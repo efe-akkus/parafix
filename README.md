@@ -30,6 +30,20 @@ Bu repo şu anda Flutter'ın diğer platform klasörlerini de içeriyor; ancak a
 - Tema seçimi ve özel kategori kişiselleştirmesi
 - Hesap oluşturmadan çalışan, yerel öncelikli kullanım yapısı
 
+## Ekran Görüntüleri
+
+| Home | Report |
+| --- | --- |
+| <img src="docs/screenshots/01-home.png" width="220" alt="Parafix home screen" /> | <img src="docs/screenshots/04-report.png" width="220" alt="Parafix report screen" /> |
+
+| Add Expense | Day Detail |
+| --- | --- |
+| <img src="docs/screenshots/03-add-expense.png" width="220" alt="Parafix add expense screen" /> | <img src="docs/screenshots/02-day-detail.png" width="220" alt="Parafix day detail sheet" /> |
+
+| Personalization |
+| --- |
+| <img src="docs/screenshots/05-personalization.png" width="220" alt="Parafix personalization sheet" /> |
+
 ## Tasarım Hedefi
 
 Parafix şu üç ilke etrafında şekilleniyor:
@@ -58,7 +72,7 @@ Parafix şu üç ilke etrafında şekilleniyor:
 
 ```bash
 flutter pub get
-flutter run -d ios
+flutter run
 ```
 
 Eğer bağlı cihazları görmek istersen:
@@ -85,7 +99,3 @@ lib/
 - Düşük cihazlarda animasyon ve geçişleri hafifletmek
 - Rapor ekranını kademeli olarak genişletmek
 - Aylık ödemeler alanını tamamlamak
-
-## Not
-
-README ve repo sunumu geliştirilmeye devam ediyor. Uygulama da halen aktif ürün geliştirme sürecinde.

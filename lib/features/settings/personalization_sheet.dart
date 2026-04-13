@@ -130,7 +130,9 @@ class _PersonalizationSheetState extends State<PersonalizationSheet> {
                                   preset.name,
                                   style: Theme.of(
                                     context,
-                                  ).textTheme.titleMedium,
+                                  ).textTheme.titleMedium?.copyWith(
+                                    color: preset.textPrimary,
+                                  ),
                                 ),
                               ],
                             ),
@@ -161,7 +163,8 @@ class _PersonalizationSheetState extends State<PersonalizationSheet> {
                             const SizedBox(height: 10),
                             Text(
                               _themeSubtitle(preset.id),
-                              style: Theme.of(context).textTheme.bodySmall,
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(color: preset.mutedText),
                             ),
                           ],
                         ),

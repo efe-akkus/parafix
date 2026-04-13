@@ -635,7 +635,7 @@ class _SummaryHero extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Text(
-                      'Aktif gün ort.',
+                      'Günlük ortalama',
                       style: Theme.of(
                         context,
                       ).textTheme.bodySmall?.copyWith(color: heroMuted),
