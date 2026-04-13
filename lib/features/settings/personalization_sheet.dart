@@ -1,0 +1,426 @@
+import 'package:flutter/material.dart';
+
+import '../../core/theme/parafix_theme.dart';
+import '../../models/expense_category.dart';
+
+class PersonalizationSheet extends StatefulWidget {
+  const PersonalizationSheet({
+    super.key,
+    this.scrollController,
+    required this.presets,
+    required this.selectedPreset,
+    required this.categories,
+    required this.customCount,
+    required this.onPresetSelected,
+  });
+
+  final ScrollController? scrollController;
+  final List<ParafixThemePreset> presets;
+  final ParafixThemePreset selectedPreset;
+  final List<ExpenseCategory> categories;
+  final int customCount;
+  final ValueChanged<ParafixThemePreset> onPresetSelected;
+
+  @override
+  State<PersonalizationSheet> createState() => _PersonalizationSheetState();
+}
+
+class _PersonalizationSheetState extends State<PersonalizationSheet> {
+  final _nameController = TextEditingController();
+  final List<IconData> _icons = const [
+    Icons.local_cafe_rounded,
+    Icons.movie_rounded,
+    Icons.sports_esports_rounded,
+    Icons.school_rounded,
+    Icons.work_rounded,
+  ];
+  final List<Color> _colors = const [
+    Color(0xFFBF5B48),
+    Color(0xFF4F7CAC),
+    Color(0xFF1F8A70),
+    Color(0xFFB35D8D),
+    Color(0xFFDAA520),
+  ];
+
+  IconData _selectedIcon = Icons.local_cafe_rounded;
+  Color _selectedColor = const Color(0xFFBF5B48);
+  ExpenseCategory? _editingCategory;
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = Theme.of(context).extension<ParafixPalette>()!;
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final canSubmitCategory =
+        _editingCategory != null || widget.customCount < 5;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: palette.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+      ),
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(20, 12, 20, bottomInset + 20),
+        child: ListView(
+          controller: widget.scrollController,
+          shrinkWrap: true,
+          physics: const BouncingScrollPhysics(
+            parent: AlwaysScrollableScrollPhysics(),
+          ),
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 14),
+                Center(
+                  child: Container(
+                    width: 48,
+                    height: 5,
+                    decoration: BoxDecoration(
+                      color: palette.border,
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  'Kişiselleştir',
+                  style: Theme.of(context).textTheme.headlineMedium,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Temayı seç, kategorilerini kendi düzenine göre şekillendir.',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                const SizedBox(height: 24),
+                Text('Tema', style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: widget.presets.map((preset) {
+                    final selected = widget.selectedPreset.id == preset.id;
+                    return GestureDetector(
+                      onTap: () => widget.onPresetSelected(preset),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 220),
+                        width: 152,
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: preset.surface,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: selected ? preset.accent : palette.border,
+                            width: selected ? 2 : 1,
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                _ColorDot(color: preset.accent),
+                                const SizedBox(width: 8),
+                                Text(
+                                  preset.name,
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.titleMedium,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 12),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    height: 30,
+                                    decoration: BoxDecoration(
+                                      color: preset.background,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: Container(
+                                    height: 30,
+                                    decoration: BoxDecoration(
+                                      color: preset.surfaceAlt,
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              _themeSubtitle(preset.id),
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  children: [
+                    Text(
+                      'Kategoriler',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const Spacer(),
+                    Text(
+                      '${widget.customCount}/5 özel kategori',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'En fazla 5 özel kategori ekleyebilirsin.',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+                const SizedBox(height: 12),
+                ...widget.categories.map(
+                  (category) => Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: InkWell(
+                      onTap: category.isBuiltIn
+                          ? null
+                          : () => _startEditingCategory(category),
+                      borderRadius: BorderRadius.circular(18),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 12,
+                        ),
+                        decoration: BoxDecoration(
+                          color: palette.surfaceAlt.withValues(alpha: 0.48),
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 38,
+                              height: 38,
+                              decoration: BoxDecoration(
+                                color: category.color.withValues(alpha: 0.16),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Icon(category.icon, color: category.color),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(child: Text(category.name)),
+                            if (category.isBuiltIn)
+                              Text(
+                                'Sabit',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              )
+                            else
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(
+                                    'Düzenle',
+                                    style: Theme.of(context).textTheme.bodySmall
+                                        ?.copyWith(color: category.color),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Icon(
+                                    Icons.edit_rounded,
+                                    size: 18,
+                                    color: category.color,
+                                  ),
+                                ],
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 18),
+                Text(
+                  _editingCategory == null
+                      ? 'Özel kategori ekle'
+                      : 'Kategoriyi düzenle',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _nameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Kategori adı',
+                    hintText: 'Örnek: Hobi',
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 10,
+                  children: _icons.map((icon) {
+                    final selected = icon == _selectedIcon;
+                    return ChoiceChip(
+                      label: Icon(icon, size: 18),
+                      selected: selected,
+                      onSelected: (_) => setState(() => _selectedIcon = icon),
+                      side: BorderSide.none,
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: _colors.map((color) {
+                    final selected = color == _selectedColor;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 10),
+                      child: GestureDetector(
+                        onTap: () => setState(() => _selectedColor = color),
+                        child: AnimatedContainer(
+                          duration: const Duration(milliseconds: 200),
+                          width: selected ? 42 : 36,
+                          height: selected ? 42 : 36,
+                          decoration: BoxDecoration(
+                            color: color,
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: selected
+                                  ? palette.textPrimary
+                                  : Colors.transparent,
+                              width: 2,
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 14),
+                if (!canSubmitCategory) ...[
+                  Text(
+                    'Limit doldu. Yeni eklemek yerine mevcut bir kategoriyi düzenleyebilirsin.',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                  const SizedBox(height: 10),
+                ],
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.tonal(
+                    onPressed: canSubmitCategory ? _submitCategory : null,
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 14),
+                      child: Text(
+                        _editingCategory == null
+                            ? 'Kategori ekle'
+                            : 'Değişiklikleri kaydet',
+                      ),
+                    ),
+                  ),
+                ),
+                if (_editingCategory != null) ...[
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    child: TextButton(
+                      onPressed: _resetEditor,
+                      child: const Text('Yeni kategoriye dön'),
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _submitCategory() {
+    final name = _nameController.text.trim();
+
+    if (name.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Kategoriye bir ad ver.')));
+      return;
+    }
+
+    Navigator.of(context).pop(
+      CategoryEditorResult(
+        previousCategoryId: _editingCategory?.id,
+        category: ExpenseCategory(
+          id:
+              _editingCategory?.id ??
+              '${name.toLowerCase()}-${DateTime.now().millisecondsSinceEpoch}',
+          name: name,
+          icon: _selectedIcon,
+          color: _selectedColor,
+        ),
+      ),
+    );
+  }
+
+  void _startEditingCategory(ExpenseCategory category) {
+    setState(() {
+      _editingCategory = category;
+      _nameController.text = category.name;
+      _selectedIcon = category.icon;
+      _selectedColor = category.color;
+    });
+  }
+
+  void _resetEditor() {
+    setState(() {
+      _editingCategory = null;
+      _nameController.clear();
+      _selectedIcon = _icons.first;
+      _selectedColor = _colors.first;
+    });
+  }
+}
+
+class CategoryEditorResult {
+  const CategoryEditorResult({required this.category, this.previousCategoryId});
+
+  final ExpenseCategory category;
+  final String? previousCategoryId;
+}
+
+class _ColorDot extends StatelessWidget {
+  const _ColorDot({required this.color});
+
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 16,
+      height: 16,
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+    );
+  }
+}
+
+String _themeSubtitle(String id) {
+  switch (id) {
+    case 'sand':
+      return 'Sıcak ve sade.';
+    case 'graphite':
+      return 'Net ve modern.';
+    case 'forest':
+      return 'Doğal ve dengeli.';
+    case 'night':
+      return 'Koyu ve odaklı.';
+    case 'dust-rose':
+      return 'Yumuşak ve kişisel.';
+    default:
+      return '';
+  }
+}
