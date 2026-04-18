@@ -128,11 +128,8 @@ class _PersonalizationSheetState extends State<PersonalizationSheet> {
                                 const SizedBox(width: 8),
                                 Text(
                                   preset.name,
-                                  style: Theme.of(
-                                    context,
-                                  ).textTheme.titleMedium?.copyWith(
-                                    color: preset.textPrimary,
-                                  ),
+                                  style: Theme.of(context).textTheme.titleMedium
+                                      ?.copyWith(color: preset.textPrimary),
                                 ),
                               ],
                             ),

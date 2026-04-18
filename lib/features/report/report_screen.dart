@@ -3,17 +3,28 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../core/theme/parafix_theme.dart';
+import '../../models/expense_category.dart';
 import '../../models/expense_entry.dart';
+import '../../models/monthly_payment.dart';
+import 'monthly_payment_sheet.dart';
 
 class ReportScreen extends StatefulWidget {
   const ReportScreen({
     super.key,
     required this.entries,
+    required this.monthlyPayments,
+    required this.categories,
     required this.accentColor,
+    required this.onUpsertMonthlyPayment,
+    required this.onDeleteMonthlyPayment,
   });
 
   final List<ExpenseEntry> entries;
+  final List<MonthlyPayment> monthlyPayments;
+  final List<ExpenseCategory> categories;
   final Color accentColor;
+  final ValueChanged<MonthlyPayment> onUpsertMonthlyPayment;
+  final ValueChanged<String> onDeleteMonthlyPayment;
 
   @override
   State<ReportScreen> createState() => _ReportScreenState();
@@ -50,6 +61,24 @@ class _ReportScreenState extends State<ReportScreen> {
       ..sort((a, b) => b.value.compareTo(a.value));
     final total = filtered.fold<double>(0, (sum, entry) => sum + entry.amount);
     final average = filtered.isEmpty ? 0.0 : total / filtered.length;
+    final activeMonthlyPayments = widget.monthlyPayments
+        .where((payment) => payment.isActive)
+        .toList(growable: false);
+    final monthlyPaymentLoad = activeMonthlyPayments.fold<double>(
+      0,
+      (sum, payment) => sum + payment.amount,
+    );
+    final sortedMonthlyPayments = _sortMonthlyPayments(
+      widget.monthlyPayments,
+      now,
+    );
+    final nextMonthlyPayment = activeMonthlyPayments.isEmpty
+        ? null
+        : (activeMonthlyPayments.toList()..sort(
+                (left, right) =>
+                    _nextDueDate(left, now).compareTo(_nextDueDate(right, now)),
+              ))
+              .first;
 
     return SafeArea(
       child: ListView(
@@ -249,15 +278,218 @@ class _ReportScreenState extends State<ReportScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Aylık Ödemeler',
-                    style: Theme.of(context).textTheme.titleMedium,
+                  Row(
+                    children: [
+                      Text(
+                        'Aylık Ödemeler',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const Spacer(),
+                      IconButton.filledTonal(
+                        onPressed: () => _openMonthlyPaymentSheet(context),
+                        icon: const Icon(Icons.add_rounded),
+                        tooltip: 'Aylık ödeme ekle',
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 12),
-                  Text(
-                    'Yakında gelecek.',
-                    style: Theme.of(context).textTheme.bodyMedium,
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _ReportMetric(
+                          label: 'Aylık yük',
+                          value: _money(monthlyPaymentLoad),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: _ReportMetric(
+                          label: 'Aktif ödeme',
+                          value: activeMonthlyPayments.length.toString(),
+                        ),
+                      ),
+                    ],
                   ),
+                  const SizedBox(height: 12),
+                  if (nextMonthlyPayment != null) ...[
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: widget.accentColor.withValues(alpha: 0.10),
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 42,
+                            height: 42,
+                            decoration: BoxDecoration(
+                              color: widget.accentColor.withValues(alpha: 0.16),
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                            child: Icon(
+                              nextMonthlyPayment.category.icon,
+                              color: widget.accentColor,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Sıradaki ödeme',
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  nextMonthlyPayment.title,
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.titleMedium,
+                                ),
+                              ],
+                            ),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                _money(nextMonthlyPayment.amount),
+                                style: Theme.of(context).textTheme.titleMedium
+                                    ?.copyWith(color: widget.accentColor),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                _dueLabel(
+                                  _nextDueDate(nextMonthlyPayment, now),
+                                  now,
+                                ),
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                  ],
+                  if (sortedMonthlyPayments.isEmpty)
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Tekrarlayan ödemelerini burada takip edebilirsin.',
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                        const SizedBox(height: 12),
+                        FilledButton.tonalIcon(
+                          onPressed: () => _openMonthlyPaymentSheet(context),
+                          icon: const Icon(Icons.add_rounded),
+                          label: const Text('İlk ödemeyi ekle'),
+                        ),
+                      ],
+                    )
+                  else
+                    ...sortedMonthlyPayments.map(
+                      (payment) => Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: InkWell(
+                          borderRadius: BorderRadius.circular(18),
+                          onTap: () => _openMonthlyPaymentSheet(
+                            context,
+                            payment: payment,
+                          ),
+                          child: Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: palette.surfaceAlt.withValues(alpha: 0.44),
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 44,
+                                  height: 44,
+                                  decoration: BoxDecoration(
+                                    color: payment.category.color.withValues(
+                                      alpha: 0.14,
+                                    ),
+                                    borderRadius: BorderRadius.circular(14),
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    payment.billingDay.toString(),
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          color: payment.category.color,
+                                        ),
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        payment.title,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium
+                                            ?.copyWith(
+                                              color: payment.isActive
+                                                  ? null
+                                                  : palette.mutedText,
+                                            ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        payment.isActive
+                                            ? 'Her ay ${payment.billingDay}. gün • ${payment.category.name}'
+                                            : 'Pasif • ${payment.category.name}',
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.bodySmall,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      _money(payment.amount),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium
+                                          ?.copyWith(
+                                            color: payment.isActive
+                                                ? widget.accentColor
+                                                : palette.mutedText,
+                                          ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      payment.isActive
+                                          ? _shortDate(
+                                              _nextDueDate(payment, now),
+                                            )
+                                          : 'Pasif',
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.bodySmall,
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
@@ -265,6 +497,41 @@ class _ReportScreenState extends State<ReportScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _openMonthlyPaymentSheet(
+    BuildContext context, {
+    MonthlyPayment? payment,
+  }) async {
+    final result = await showModalBottomSheet<MonthlyPaymentSheetResult>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => MonthlyPaymentSheet(
+        categories: widget.categories,
+        initialPayment: payment,
+      ),
+    );
+
+    if (!context.mounted || result == null) {
+      return;
+    }
+
+    switch (result.action) {
+      case MonthlyPaymentSheetAction.save:
+        final nextPayment = result.payment;
+        if (nextPayment != null) {
+          widget.onUpsertMonthlyPayment(nextPayment);
+        }
+        break;
+      case MonthlyPaymentSheetAction.delete:
+        final deletedPaymentId = result.deletedPaymentId;
+        if (deletedPaymentId != null) {
+          widget.onDeleteMonthlyPayment(deletedPaymentId);
+        }
+        break;
+    }
   }
 }
 
@@ -344,6 +611,22 @@ class _Bucket {
 
   final String label;
   final double value;
+}
+
+List<MonthlyPayment> _sortMonthlyPayments(
+  List<MonthlyPayment> payments,
+  DateTime now,
+) {
+  final activePayments = payments.where((payment) => payment.isActive).toList()
+    ..sort(
+      (left, right) =>
+          _nextDueDate(left, now).compareTo(_nextDueDate(right, now)),
+    );
+  final inactivePayments =
+      payments.where((payment) => !payment.isActive).toList()
+        ..sort((left, right) => left.title.compareTo(right.title));
+
+  return [...activePayments, ...inactivePayments];
 }
 
 List<ExpenseEntry> _filterEntries(
@@ -488,6 +771,58 @@ bool _sameDay(DateTime left, DateTime right) {
 
 DateTime _atStartOfDay(DateTime value) {
   return DateTime(value.year, value.month, value.day);
+}
+
+DateTime _nextDueDate(MonthlyPayment payment, DateTime now) {
+  final today = _atStartOfDay(now);
+  final currentMonthDueDate = _dueDateForMonth(payment, now.year, now.month);
+
+  if (!currentMonthDueDate.isBefore(today)) {
+    return currentMonthDueDate;
+  }
+
+  final nextMonthDate = DateTime(now.year, now.month + 1);
+  return _dueDateForMonth(payment, nextMonthDate.year, nextMonthDate.month);
+}
+
+DateTime _dueDateForMonth(MonthlyPayment payment, int year, int month) {
+  final day = math.min(payment.billingDay, _daysInMonth(year, month));
+  return DateTime(year, month, day);
+}
+
+int _daysInMonth(int year, int month) {
+  return DateTime(year, month + 1, 0).day;
+}
+
+String _dueLabel(DateTime dueDate, DateTime now) {
+  final difference = dueDate.difference(_atStartOfDay(now)).inDays;
+
+  if (difference == 0) {
+    return 'Bugün';
+  }
+  if (difference == 1) {
+    return 'Yarın';
+  }
+
+  return '$difference gün sonra';
+}
+
+String _shortDate(DateTime date) {
+  const months = [
+    'Oca',
+    'Şub',
+    'Mar',
+    'Nis',
+    'May',
+    'Haz',
+    'Tem',
+    'Ağu',
+    'Eyl',
+    'Eki',
+    'Kas',
+    'Ara',
+  ];
+  return '${date.day} ${months[date.month - 1]}';
 }
 
 String _money(double value) => '${_groupedWhole(value)}₺';

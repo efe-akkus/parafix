@@ -12,6 +12,7 @@ import '../features/report/report_screen.dart';
 import '../features/settings/personalization_sheet.dart';
 import '../models/expense_category.dart';
 import '../models/expense_entry.dart';
+import '../models/monthly_payment.dart';
 
 class ParafixApp extends StatefulWidget {
   const ParafixApp({super.key});
@@ -24,10 +25,12 @@ class _ParafixAppState extends State<ParafixApp> {
   static const _themeStorageKey = 'parafix_theme_preset_v1';
   static const _customCategoriesStorageKey = 'parafix_custom_categories_v1';
   static const _entriesStorageKey = 'parafix_entries_v1';
+  static const _monthlyPaymentsStorageKey = 'parafix_monthly_payments_v1';
 
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   late final PageController _pageController;
   late final ValueNotifier<List<ExpenseEntry>> _entriesNotifier;
+  late final ValueNotifier<List<MonthlyPayment>> _monthlyPaymentsNotifier;
   late final ValueNotifier<int> _tabIndexNotifier;
   OverlayEntry? _feedbackEntry;
   Timer? _feedbackTimer;
@@ -94,6 +97,7 @@ class _ParafixAppState extends State<ParafixApp> {
       ),
     ];
     _entriesNotifier = ValueNotifier(_seedEntries());
+    _monthlyPaymentsNotifier = ValueNotifier(_seedMonthlyPayments());
     unawaited(_restorePersistedState());
   }
 
@@ -108,6 +112,7 @@ class _ParafixAppState extends State<ParafixApp> {
     _feedbackEntry?.remove();
     _pageController.dispose();
     _entriesNotifier.dispose();
+    _monthlyPaymentsNotifier.dispose();
     _tabIndexNotifier.dispose();
     super.dispose();
   }
@@ -183,14 +188,21 @@ class _ParafixAppState extends State<ParafixApp> {
                 );
               },
             ),
-            ValueListenableBuilder<List<ExpenseEntry>>(
-              valueListenable: _entriesNotifier,
-              builder: (context, entries, _) {
+            ListenableBuilder(
+              listenable: Listenable.merge([
+                _entriesNotifier,
+                _monthlyPaymentsNotifier,
+              ]),
+              builder: (context, _) {
                 return RepaintBoundary(
                   child: ReportScreen(
                     key: const PageStorageKey('report-screen'),
-                    entries: entries,
+                    entries: _entriesNotifier.value,
+                    monthlyPayments: _monthlyPaymentsNotifier.value,
+                    categories: _allCategories,
                     accentColor: _selectedPreset.accent,
+                    onUpsertMonthlyPayment: _upsertMonthlyPayment,
+                    onDeleteMonthlyPayment: _deleteMonthlyPayment,
                   ),
                 );
               },
@@ -340,6 +352,14 @@ class _ParafixAppState extends State<ParafixApp> {
                   : entry,
             )
             .toList(growable: false);
+        _monthlyPaymentsNotifier.value = _monthlyPaymentsNotifier.value
+            .map(
+              (payment) =>
+                  payment.category.id == categoryResult.previousCategoryId
+                  ? payment.copyWith(category: categoryResult.category)
+                  : payment,
+            )
+            .toList(growable: false);
       } else {
         _customCategories = [..._customCategories, categoryResult.category];
       }
@@ -464,6 +484,37 @@ class _ParafixAppState extends State<ParafixApp> {
     ]..sort((a, b) => b.date.compareTo(a.date));
   }
 
+  List<MonthlyPayment> _seedMonthlyPayments() {
+    final categories = {
+      for (final category in [..._coreCategories, ..._customCategories])
+        category.id: category,
+    };
+
+    return [
+      MonthlyPayment(
+        id: 'monthly-1',
+        title: 'Spotify Premium',
+        amount: 60,
+        billingDay: 16,
+        category: categories['bills']!,
+      ),
+      MonthlyPayment(
+        id: 'monthly-2',
+        title: 'İnternet',
+        amount: 350,
+        billingDay: 20,
+        category: categories['bills']!,
+      ),
+      MonthlyPayment(
+        id: 'monthly-3',
+        title: 'iCloud+',
+        amount: 80,
+        billingDay: 24,
+        category: categories['other']!,
+      ),
+    ];
+  }
+
   List<ExpenseEntry> _insertEntrySorted(
     List<ExpenseEntry> entries,
     ExpenseEntry newEntry,
@@ -512,6 +563,39 @@ class _ParafixAppState extends State<ParafixApp> {
     return ids;
   }
 
+  void _upsertMonthlyPayment(MonthlyPayment nextPayment) {
+    final isEditing = _monthlyPaymentsNotifier.value.any(
+      (payment) => payment.id == nextPayment.id,
+    );
+    _monthlyPaymentsNotifier.value = _upsertMonthlyPaymentList(
+      _monthlyPaymentsNotifier.value,
+      nextPayment,
+    );
+    unawaited(_persistState());
+    _showFeedback(
+      isEditing ? 'Aylık ödeme güncellendi.' : 'Aylık ödeme eklendi.',
+    );
+  }
+
+  List<MonthlyPayment> _upsertMonthlyPaymentList(
+    List<MonthlyPayment> payments,
+    MonthlyPayment nextPayment,
+  ) {
+    final nextPayments = payments
+        .where((payment) => payment.id != nextPayment.id)
+        .toList(growable: true);
+    nextPayments.add(nextPayment);
+    return List<MonthlyPayment>.unmodifiable(nextPayments);
+  }
+
+  void _deleteMonthlyPayment(String id) {
+    _monthlyPaymentsNotifier.value = _monthlyPaymentsNotifier.value
+        .where((payment) => payment.id != id)
+        .toList(growable: false);
+    unawaited(_persistState());
+    _showFeedback('Aylık ödeme silindi.');
+  }
+
   void _goToTab(int index) {
     if (_tabIndexNotifier.value == index) {
       return;
@@ -548,10 +632,14 @@ class _ParafixAppState extends State<ParafixApp> {
       _customCategoriesStorageKey,
     );
     final storedEntries = preferences.getString(_entriesStorageKey);
+    final storedMonthlyPayments = preferences.getString(
+      _monthlyPaymentsStorageKey,
+    );
 
     var nextPreset = _selectedPreset;
     var nextCustomCategories = _customCategories;
     List<ExpenseEntry>? nextEntries;
+    var nextMonthlyPayments = _monthlyPaymentsNotifier.value;
 
     if (storedPresetId != null) {
       nextPreset = ParafixTheme.presets.firstWhere(
@@ -591,6 +679,28 @@ class _ParafixAppState extends State<ParafixApp> {
             ..sort((a, b) => b.date.compareTo(a.date));
     }
 
+    if (storedMonthlyPayments != null) {
+      final categoriesById = {
+        for (final category in [..._coreCategories, ...nextCustomCategories])
+          category.id: category,
+      };
+      final fallbackCategory = categoriesById['other']!;
+      final decoded = jsonDecode(storedMonthlyPayments) as List<dynamic>;
+      nextMonthlyPayments = decoded
+          .map(
+            (item) => MonthlyPayment.fromJson(
+              Map<String, dynamic>.from(item as Map),
+              resolveCategory: (categoryId) =>
+                  categoriesById[categoryId] ?? fallbackCategory,
+            ),
+          )
+          .toList(growable: false);
+    } else if (storedPresetId != null ||
+        storedCustomCategories != null ||
+        storedEntries != null) {
+      nextMonthlyPayments = const [];
+    }
+
     if (!mounted) {
       return;
     }
@@ -601,6 +711,7 @@ class _ParafixAppState extends State<ParafixApp> {
       if (nextEntries != null) {
         _entriesNotifier.value = nextEntries;
       }
+      _monthlyPaymentsNotifier.value = nextMonthlyPayments;
     });
   }
 
@@ -617,6 +728,14 @@ class _ParafixAppState extends State<ParafixApp> {
       _entriesStorageKey,
       jsonEncode(
         _entriesNotifier.value.map((entry) => entry.toJson()).toList(),
+      ),
+    );
+    await preferences.setString(
+      _monthlyPaymentsStorageKey,
+      jsonEncode(
+        _monthlyPaymentsNotifier.value
+            .map((payment) => payment.toJson())
+            .toList(),
       ),
     );
   }
