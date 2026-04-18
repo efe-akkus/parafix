@@ -248,18 +248,30 @@ class _ParafixAppState extends State<ParafixApp> {
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => AddExpenseSheet(
-        categories: _allCategories,
-        recentCategoryIds: _recentCategoryIds(),
-        initialEntry: entry == null
-            ? null
-            : ExpenseDraft(
-                title: entry.title,
-                amount: entry.amount,
-                date: entry.date,
-                category: entry.category,
-                note: entry.note,
-              ),
+      builder: (_) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.86,
+        minChildSize: 0.52,
+        maxChildSize: 0.94,
+        snap: true,
+        snapSizes: const [0.86],
+        shouldCloseOnMinExtent: true,
+        builder: (context, scrollController) {
+          return AddExpenseSheet(
+            scrollController: scrollController,
+            categories: _allCategories,
+            recentCategoryIds: _recentCategoryIds(),
+            initialEntry: entry == null
+                ? null
+                : ExpenseDraft(
+                    title: entry.title,
+                    amount: entry.amount,
+                    date: entry.date,
+                    category: entry.category,
+                    note: entry.note,
+                  ),
+          );
+        },
       ),
     );
 

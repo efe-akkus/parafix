@@ -10,11 +10,13 @@ class AddExpenseSheet extends StatefulWidget {
     required this.categories,
     this.recentCategoryIds = const [],
     this.initialEntry,
+    this.scrollController,
   });
 
   final List<ExpenseCategory> categories;
   final List<String> recentCategoryIds;
   final ExpenseDraft? initialEntry;
+  final ScrollController? scrollController;
 
   @override
   State<AddExpenseSheet> createState() => _AddExpenseSheetState();
@@ -108,6 +110,10 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
         child: Padding(
           padding: EdgeInsets.fromLTRB(20, 12, 20, bottomInset + 20),
           child: SingleChildScrollView(
+            controller: widget.scrollController,
+            physics: const BouncingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics(),
+            ),
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             child: Form(
               key: _formKey,
@@ -116,6 +122,7 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  const SizedBox(height: 14),
                   Center(
                     child: Container(
                       width: 48,

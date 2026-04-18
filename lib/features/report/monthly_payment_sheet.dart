@@ -10,10 +10,12 @@ class MonthlyPaymentSheet extends StatefulWidget {
     super.key,
     required this.categories,
     this.initialPayment,
+    this.scrollController,
   });
 
   final List<ExpenseCategory> categories;
   final MonthlyPayment? initialPayment;
+  final ScrollController? scrollController;
 
   @override
   State<MonthlyPaymentSheet> createState() => _MonthlyPaymentSheetState();
@@ -75,6 +77,10 @@ class _MonthlyPaymentSheetState extends State<MonthlyPaymentSheet> {
         child: Padding(
           padding: EdgeInsets.fromLTRB(20, 12, 20, bottomInset + 20),
           child: SingleChildScrollView(
+            controller: widget.scrollController,
+            physics: const BouncingScrollPhysics(
+              parent: AlwaysScrollableScrollPhysics(),
+            ),
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             child: Form(
               key: _formKey,
@@ -83,6 +89,7 @@ class _MonthlyPaymentSheetState extends State<MonthlyPaymentSheet> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
+                  const SizedBox(height: 14),
                   Center(
                     child: Container(
                       width: 48,

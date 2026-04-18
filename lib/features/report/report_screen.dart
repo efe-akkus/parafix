@@ -508,9 +508,21 @@ class _ReportScreenState extends State<ReportScreen> {
       isScrollControlled: true,
       useSafeArea: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => MonthlyPaymentSheet(
-        categories: widget.categories,
-        initialPayment: payment,
+      builder: (_) => DraggableScrollableSheet(
+        expand: false,
+        initialChildSize: 0.86,
+        minChildSize: 0.52,
+        maxChildSize: 0.94,
+        snap: true,
+        snapSizes: const [0.86],
+        shouldCloseOnMinExtent: true,
+        builder: (context, scrollController) {
+          return MonthlyPaymentSheet(
+            scrollController: scrollController,
+            categories: widget.categories,
+            initialPayment: payment,
+          );
+        },
       ),
     );
 
