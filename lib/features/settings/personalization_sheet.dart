@@ -69,9 +69,7 @@ class _PersonalizationSheetState extends State<PersonalizationSheet> {
         child: ListView(
           controller: widget.scrollController,
           shrinkWrap: true,
-          physics: const BouncingScrollPhysics(
-            parent: AlwaysScrollableScrollPhysics(),
-          ),
+          physics: parafixPlatformScrollPhysics(Theme.of(context).platform),
           children: [
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,

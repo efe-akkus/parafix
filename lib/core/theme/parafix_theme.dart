@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class ParafixTheme {
   static final List<ParafixThemePreset> presets = [
@@ -61,6 +62,7 @@ class ParafixTheme {
 
   static ThemeData buildTheme({required ParafixThemePreset preset}) {
     final palette = preset.toPalette();
+    final isDark = preset.brightness == Brightness.dark;
     final scheme = ColorScheme(
       brightness: preset.brightness,
       primary: palette.accent,
@@ -104,6 +106,16 @@ class ParafixTheme {
         elevation: 0,
         scrolledUnderElevation: 0,
         surfaceTintColor: Colors.transparent,
+        systemOverlayStyle: SystemUiOverlayStyle(
+          statusBarColor: Colors.transparent,
+          statusBarIconBrightness: isDark ? Brightness.light : Brightness.dark,
+          statusBarBrightness: isDark ? Brightness.dark : Brightness.light,
+          systemNavigationBarColor: palette.surface,
+          systemNavigationBarDividerColor: Colors.transparent,
+          systemNavigationBarIconBrightness: isDark
+              ? Brightness.light
+              : Brightness.dark,
+        ),
         centerTitle: true,
         titleTextStyle: TextStyle(
           color: palette.textPrimary,
@@ -200,6 +212,48 @@ class ParafixTheme {
         ),
       ),
     );
+  }
+}
+
+ScrollPhysics parafixPlatformScrollPhysics(TargetPlatform platform) {
+  switch (platform) {
+    case TargetPlatform.iOS:
+    case TargetPlatform.macOS:
+      return const BouncingScrollPhysics(
+        parent: AlwaysScrollableScrollPhysics(),
+      );
+    case TargetPlatform.android:
+    case TargetPlatform.fuchsia:
+    case TargetPlatform.linux:
+    case TargetPlatform.windows:
+      return const ClampingScrollPhysics();
+  }
+}
+
+class ParafixScrollBehavior extends MaterialScrollBehavior {
+  const ParafixScrollBehavior();
+
+  @override
+  ScrollPhysics getScrollPhysics(BuildContext context) {
+    return parafixPlatformScrollPhysics(getPlatform(context));
+  }
+
+  @override
+  Widget buildOverscrollIndicator(
+    BuildContext context,
+    Widget child,
+    ScrollableDetails details,
+  ) {
+    switch (getPlatform(context)) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        return child;
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
+      case TargetPlatform.linux:
+      case TargetPlatform.windows:
+        return super.buildOverscrollIndicator(context, child, details);
+    }
   }
 }
 

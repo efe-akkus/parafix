@@ -362,8 +362,8 @@ class HomeScreen extends StatelessWidget {
                   padding: EdgeInsets.fromLTRB(20, 12, 20, bottomInset + 20),
                   child: ListView(
                     controller: scrollController,
-                    physics: const BouncingScrollPhysics(
-                      parent: AlwaysScrollableScrollPhysics(),
+                    physics: parafixPlatformScrollPhysics(
+                      Theme.of(context).platform,
                     ),
                     children: [
                       const SizedBox(height: 14),

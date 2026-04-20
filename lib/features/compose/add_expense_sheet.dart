@@ -111,9 +111,7 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
           padding: EdgeInsets.fromLTRB(20, 12, 20, bottomInset + 20),
           child: SingleChildScrollView(
             controller: widget.scrollController,
-            physics: const BouncingScrollPhysics(
-              parent: AlwaysScrollableScrollPhysics(),
-            ),
+            physics: parafixPlatformScrollPhysics(Theme.of(context).platform),
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             child: Form(
               key: _formKey,

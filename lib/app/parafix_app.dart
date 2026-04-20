@@ -131,6 +131,7 @@ class _ParafixAppState extends State<ParafixApp> {
       ],
       supportedLocales: const [Locale('tr'), Locale('en')],
       theme: ParafixTheme.buildTheme(preset: _selectedPreset),
+      scrollBehavior: const ParafixScrollBehavior(),
       home: Scaffold(
         extendBody: true,
         appBar: AppBar(
