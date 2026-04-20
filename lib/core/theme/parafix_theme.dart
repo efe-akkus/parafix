@@ -3,17 +3,6 @@ import 'package:flutter/material.dart';
 class ParafixTheme {
   static final List<ParafixThemePreset> presets = [
     const ParafixThemePreset(
-      id: 'sand',
-      name: 'Kum',
-      brightness: Brightness.light,
-      background: Color(0xFFF3EDE2),
-      surface: Color(0xFFFBF7F0),
-      surfaceAlt: Color(0xFFEADFCF),
-      textPrimary: Color(0xFF1F2520),
-      mutedText: Color(0xFF69716B),
-      accent: Color(0xFFD4A437),
-    ),
-    const ParafixThemePreset(
       id: 'graphite',
       name: 'Grafit',
       brightness: Brightness.light,
@@ -36,15 +25,15 @@ class ParafixTheme {
       accent: Color(0xFF2F8A62),
     ),
     const ParafixThemePreset(
-      id: 'night',
-      name: 'Koyu',
-      brightness: Brightness.dark,
-      background: Color(0xFF101723),
-      surface: Color(0xFF182131),
-      surfaceAlt: Color(0xFF243149),
-      textPrimary: Color(0xFFF4F7FB),
-      mutedText: Color(0xFFA8B5C8),
-      accent: Color(0xFF5D86F8),
+      id: 'sand',
+      name: 'Kum',
+      brightness: Brightness.light,
+      background: Color(0xFFF3EDE2),
+      surface: Color(0xFFFBF7F0),
+      surfaceAlt: Color(0xFFEADFCF),
+      textPrimary: Color(0xFF1F2520),
+      mutedText: Color(0xFF69716B),
+      accent: Color(0xFFD4A437),
     ),
     const ParafixThemePreset(
       id: 'dust-rose',
@@ -56,6 +45,17 @@ class ParafixTheme {
       textPrimary: Color(0xFF2A2023),
       mutedText: Color(0xFF79676D),
       accent: Color(0xFFC17D8F),
+    ),
+    const ParafixThemePreset(
+      id: 'night',
+      name: 'Koyu',
+      brightness: Brightness.dark,
+      background: Color(0xFF101723),
+      surface: Color(0xFF182131),
+      surfaceAlt: Color(0xFF243149),
+      textPrimary: Color(0xFFF4F7FB),
+      mutedText: Color(0xFFA8B5C8),
+      accent: Color(0xFF5D86F8),
     ),
   ];
 
