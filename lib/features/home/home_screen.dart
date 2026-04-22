@@ -22,7 +22,6 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = Theme.of(context).extension<ParafixPalette>()!;
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final weekStart = today.subtract(const Duration(days: 6));
@@ -48,124 +47,217 @@ class HomeScreen extends StatelessWidget {
         ? recentDays[recentDays.length - 2].total
         : 0.0;
 
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            palette.background,
-            palette.surfaceAlt.withValues(alpha: 0.4),
-          ],
-        ),
-      ),
-      child: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 120),
-          children: [
-            _SummaryHero(
-              todayTotal: todayTotal,
-              weekTotal: weekTotal,
-              monthTotal: monthTotal,
-              accentColor: accentColor,
-              dailyAverage: activeDayAverage,
-            ),
-            if (entries.isEmpty) ...[
-              const SizedBox(height: 18),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'İlk harcamanı ekle',
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Ortadaki + ile ilk kaydını ekle. Özet ve raporlar hemen dolmaya başlar.',
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                    ],
-                  ),
+    return SafeArea(
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 12, 20, 120),
+        children: [
+          _SummaryHero(
+            todayTotal: todayTotal,
+            weekTotal: weekTotal,
+            monthTotal: monthTotal,
+            accentColor: accentColor,
+            dailyAverage: activeDayAverage,
+          ),
+          if (entries.isEmpty) ...[
+            const SizedBox(height: 18),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'İlk harcamanı ekle',
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Ortadaki + ile ilk kaydını ekle. Özet ve raporlar hemen dolmaya başlar.',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
                 ),
               ),
-            ] else ...[
-              const SizedBox(height: 18),
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            '7 günlük akış',
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          const Spacer(),
-                          Text(
-                            'Bugün dahil',
-                            style: Theme.of(context).textTheme.labelMedium
-                                ?.copyWith(
-                                  color: accentColor,
-                                  fontWeight: FontWeight.w700,
-                                ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 18),
-                      SizedBox(
-                        height: 140,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: recentDays
-                              .map(
-                                (item) => Expanded(
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 4,
-                                    ),
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        Text(
+            ),
+          ] else ...[
+            const SizedBox(height: 18),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          '7 günlük akış',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const Spacer(),
+                        Text(
+                          'Bugün dahil',
+                          style: Theme.of(context).textTheme.labelMedium
+                              ?.copyWith(
+                                color: accentColor,
+                                fontWeight: FontWeight.w700,
+                              ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 18),
+                    SizedBox(
+                      height: 140,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: recentDays
+                            .map(
+                              (item) => Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 4,
+                                  ),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        item.total == 0
+                                            ? '-'
+                                            : _shortAmount(item.total),
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.bodySmall,
+                                      ),
+                                      const SizedBox(height: 10),
+                                      Container(
+                                        height: math.max(
+                                          12,
                                           item.total == 0
-                                              ? '-'
-                                              : _shortAmount(item.total),
-                                          style: Theme.of(
-                                            context,
-                                          ).textTheme.bodySmall,
+                                              ? 12
+                                              : (item.total /
+                                                            _maxTotal(
+                                                              recentDays,
+                                                            )) *
+                                                        72 +
+                                                    14,
                                         ),
-                                        const SizedBox(height: 10),
-                                        Container(
-                                          height: math.max(
-                                            12,
-                                            item.total == 0
-                                                ? 12
-                                                : (item.total /
-                                                              _maxTotal(
-                                                                recentDays,
-                                                              )) *
-                                                          72 +
-                                                      14,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: item.isToday
-                                                ? accentColor
-                                                : accentColor.withValues(
-                                                    alpha: 0.24,
-                                                  ),
-                                            borderRadius: BorderRadius.circular(
-                                              14,
-                                            ),
+                                        decoration: BoxDecoration(
+                                          color: item.isToday
+                                              ? accentColor
+                                              : accentColor.withValues(
+                                                  alpha: 0.24,
+                                                ),
+                                          borderRadius: BorderRadius.circular(
+                                            14,
                                           ),
                                         ),
-                                        const SizedBox(height: 8),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        item.dayLabel,
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.bodySmall,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            )
+                            .toList(),
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    Row(
+                      children: [
+                        _StatPill(
+                          label: '7 gün ort.',
+                          value: _money(weekAverage),
+                        ),
+                        const SizedBox(width: 10),
+                        _StatPill(
+                          label: 'Düne göre',
+                          value: _differenceFromYesterdayLabel(
+                            todayTotal - yesterdayTotal,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+            Text(
+              'Son harcamalar',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 6),
+            Text('Son 5 gün', style: Theme.of(context).textTheme.bodySmall),
+            const SizedBox(height: 10),
+            ...previewGroups.map(
+              (group) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: InkWell(
+                  borderRadius: BorderRadius.circular(28),
+                  onTap: () => _openDayDetails(
+                    context,
+                    group,
+                    onDeleteEntry,
+                    onEditEntry,
+                  ),
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(18),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                group.label,
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                              const Spacer(),
+                              Flexible(
+                                child: _ScaledText(
+                                  text: _money(group.total),
+                                  alignment: Alignment.centerRight,
+                                  style: Theme.of(context).textTheme.titleMedium
+                                      ?.copyWith(color: accentColor),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 12),
+                          ...group.previewEntries.map(
+                            (entry) => Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: Row(
+                                children: [
+                                  Container(
+                                    width: 42,
+                                    height: 42,
+                                    decoration: BoxDecoration(
+                                      color: entry.category.color.withValues(
+                                        alpha: 0.15,
+                                      ),
+                                      borderRadius: BorderRadius.circular(14),
+                                    ),
+                                    child: Icon(
+                                      entry.category.icon,
+                                      color: entry.category.color,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(entry.title),
+                                        const SizedBox(height: 2),
                                         Text(
-                                          item.dayLabel,
+                                          entry.category.name,
                                           style: Theme.of(
                                             context,
                                           ).textTheme.bodySmall,
@@ -173,151 +265,42 @@ class HomeScreen extends StatelessWidget {
                                       ],
                                     ),
                                   ),
-                                ),
-                              )
-                              .toList(),
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                      Row(
-                        children: [
-                          _StatPill(
-                            label: '7 gün ort.',
-                            value: _money(weekAverage),
-                          ),
-                          const SizedBox(width: 10),
-                          _StatPill(
-                            label: 'Düne göre',
-                            value: _differenceFromYesterdayLabel(
-                              todayTotal - yesterdayTotal,
+                                  Flexible(
+                                    child: _ScaledText(
+                                      text: _money(entry.amount),
+                                      alignment: Alignment.centerRight,
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.titleMedium,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
+                          ),
+                          Row(
+                            children: [
+                              Text(
+                                '${group.entries.length} harcama',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                              const Spacer(),
+                              Text(
+                                'Detayı aç',
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(color: accentColor),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 18),
-              Text(
-                'Son harcamalar',
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const SizedBox(height: 6),
-              Text('Son 5 gün', style: Theme.of(context).textTheme.bodySmall),
-              const SizedBox(height: 10),
-              ...previewGroups.map(
-                (group) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(28),
-                    onTap: () => _openDayDetails(
-                      context,
-                      group,
-                      onDeleteEntry,
-                      onEditEntry,
-                    ),
-                    child: Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(18),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Text(
-                                  group.label,
-                                  style: Theme.of(
-                                    context,
-                                  ).textTheme.titleMedium,
-                                ),
-                                const Spacer(),
-                                Flexible(
-                                  child: _ScaledText(
-                                    text: _money(group.total),
-                                    alignment: Alignment.centerRight,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .titleMedium
-                                        ?.copyWith(color: accentColor),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            ...group.previewEntries.map(
-                              (entry) => Padding(
-                                padding: const EdgeInsets.only(bottom: 10),
-                                child: Row(
-                                  children: [
-                                    Container(
-                                      width: 42,
-                                      height: 42,
-                                      decoration: BoxDecoration(
-                                        color: entry.category.color.withValues(
-                                          alpha: 0.15,
-                                        ),
-                                        borderRadius: BorderRadius.circular(14),
-                                      ),
-                                      child: Icon(
-                                        entry.category.icon,
-                                        color: entry.category.color,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(entry.title),
-                                          const SizedBox(height: 2),
-                                          Text(
-                                            entry.category.name,
-                                            style: Theme.of(
-                                              context,
-                                            ).textTheme.bodySmall,
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    Flexible(
-                                      child: _ScaledText(
-                                        text: _money(entry.amount),
-                                        alignment: Alignment.centerRight,
-                                        style: Theme.of(
-                                          context,
-                                        ).textTheme.titleMedium,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                            Row(
-                              children: [
-                                Text(
-                                  '${group.entries.length} harcama',
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                ),
-                                const Spacer(),
-                                Text(
-                                  'Detayı aç',
-                                  style: Theme.of(context).textTheme.bodySmall
-                                      ?.copyWith(color: accentColor),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
                     ),
                   ),
                 ),
               ),
-            ],
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
