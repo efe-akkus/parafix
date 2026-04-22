@@ -106,8 +106,8 @@ class _MonthlyPaymentSheetState extends State<MonthlyPaymentSheet> {
                   const SizedBox(height: 6),
                   Text(
                     isEditing
-                        ? 'Tutarı, günü ya da durumu güncelle.'
-                        : 'Tekrarlayan ödemelerini tek yerde topla.',
+                        ? 'Bilgileri güncelle.'
+                        : 'Tekrarlayan bir ödeme kaydı ekle.',
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                   const SizedBox(height: 20),
@@ -116,7 +116,9 @@ class _MonthlyPaymentSheetState extends State<MonthlyPaymentSheet> {
                     keyboardType: TextInputType.number,
                     textInputAction: TextInputAction.next,
                     onFieldSubmitted: (_) => FocusScope.of(context).nextFocus(),
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    inputFormatters: const [
+                      _MonthlyPaymentAmountInputFormatter(),
+                    ],
                     style: Theme.of(context).textTheme.headlineMedium,
                     decoration: const InputDecoration(
                       labelText: 'Tutar',
@@ -157,22 +159,11 @@ class _MonthlyPaymentSheetState extends State<MonthlyPaymentSheet> {
                     runSpacing: 10,
                     children: widget.categories
                         .map(
-                          (category) => ChoiceChip(
-                            label: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(category.icon, size: 18),
-                                const SizedBox(width: 8),
-                                Text(category.name),
-                              ],
-                            ),
+                          (category) => _MonthlyPaymentCategoryChip(
+                            category: category,
                             selected: _selectedCategory.id == category.id,
-                            onSelected: (_) =>
+                            onSelected: () =>
                                 setState(() => _selectedCategory = category),
-                            selectedColor: category.color.withValues(
-                              alpha: 0.18,
-                            ),
-                            side: BorderSide.none,
                           ),
                         )
                         .toList(),
@@ -212,18 +203,28 @@ class _MonthlyPaymentSheetState extends State<MonthlyPaymentSheet> {
                       hintText: 'İstersen kısa bir açıklama ekle.',
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  SwitchListTile.adaptive(
-                    contentPadding: EdgeInsets.zero,
-                    title: const Text('Aktif'),
-                    subtitle: Text(
-                      _isActive
-                          ? 'Raporlarda ve yaklaşan ödemelerde görünsün.'
-                          : 'Kayıt dursun ama toplamda sayılmasın.',
-                      style: Theme.of(context).textTheme.bodySmall,
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 4,
                     ),
-                    value: _isActive,
-                    onChanged: (value) => setState(() => _isActive = value),
+                    decoration: BoxDecoration(
+                      color: palette.surfaceAlt.withValues(alpha: 0.44),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: SwitchListTile.adaptive(
+                      contentPadding: EdgeInsets.zero,
+                      title: const Text('Aktif'),
+                      subtitle: Text(
+                        _isActive
+                            ? 'Raporlarda ve sıradaki ödeme kartında görünsün.'
+                            : 'Kayıt dursun ama toplam yükte sayılmasın.',
+                        style: Theme.of(context).textTheme.bodySmall,
+                      ),
+                      value: _isActive,
+                      onChanged: (value) => setState(() => _isActive = value),
+                    ),
                   ),
                   const SizedBox(height: 12),
                   SizedBox(
@@ -320,4 +321,51 @@ class MonthlyPaymentSheetResult {
   final MonthlyPaymentSheetAction action;
   final MonthlyPayment? payment;
   final String? deletedPaymentId;
+}
+
+class _MonthlyPaymentAmountInputFormatter extends TextInputFormatter {
+  const _MonthlyPaymentAmountInputFormatter();
+
+  static final RegExp _validPattern = RegExp(r'^\d{0,8}$');
+
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    if (newValue.text.isEmpty || _validPattern.hasMatch(newValue.text)) {
+      return newValue;
+    }
+    return oldValue;
+  }
+}
+
+class _MonthlyPaymentCategoryChip extends StatelessWidget {
+  const _MonthlyPaymentCategoryChip({
+    required this.category,
+    required this.selected,
+    required this.onSelected,
+  });
+
+  final ExpenseCategory category;
+  final bool selected;
+  final VoidCallback onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return ChoiceChip(
+      label: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(category.icon, size: 18),
+          const SizedBox(width: 8),
+          Text(category.name),
+        ],
+      ),
+      selected: selected,
+      onSelected: (_) => onSelected(),
+      selectedColor: category.color.withValues(alpha: 0.18),
+      side: BorderSide.none,
+    );
+  }
 }

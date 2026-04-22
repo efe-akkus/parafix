@@ -79,6 +79,9 @@ class _ReportScreenState extends State<ReportScreen> {
                     _nextDueDate(left, now).compareTo(_nextDueDate(right, now)),
               ))
               .first;
+    final remainingMonthlyPayments = sortedMonthlyPayments
+        .where((payment) => payment.id != nextMonthlyPayment?.id)
+        .toList(growable: false);
 
     return SafeArea(
       child: ListView(
@@ -312,64 +315,82 @@ class _ReportScreenState extends State<ReportScreen> {
                   ),
                   const SizedBox(height: 12),
                   if (nextMonthlyPayment != null) ...[
-                    Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: widget.accentColor.withValues(alpha: 0.10),
-                        borderRadius: BorderRadius.circular(18),
+                    InkWell(
+                      borderRadius: BorderRadius.circular(18),
+                      onTap: () => _openMonthlyPaymentSheet(
+                        context,
+                        payment: nextMonthlyPayment,
                       ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 42,
-                            height: 42,
-                            decoration: BoxDecoration(
-                              color: widget.accentColor.withValues(alpha: 0.16),
-                              borderRadius: BorderRadius.circular(14),
+                      child: Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: widget.accentColor.withValues(alpha: 0.10),
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 42,
+                              height: 42,
+                              decoration: BoxDecoration(
+                                color: widget.accentColor.withValues(
+                                  alpha: 0.16,
+                                ),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: Icon(
+                                nextMonthlyPayment.category.icon,
+                                color: widget.accentColor,
+                              ),
                             ),
-                            child: Icon(
-                              nextMonthlyPayment.category.icon,
-                              color: widget.accentColor,
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Sıradaki ödeme',
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.bodySmall,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    nextMonthlyPayment.title,
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.titleMedium,
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    '${nextMonthlyPayment.category.name} • ${_shortDate(_nextDueDate(nextMonthlyPayment, now))}',
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.bodySmall,
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
                                 Text(
-                                  'Sıradaki ödeme',
-                                  style: Theme.of(context).textTheme.bodySmall,
+                                  _money(nextMonthlyPayment.amount),
+                                  style: Theme.of(context).textTheme.titleMedium
+                                      ?.copyWith(color: widget.accentColor),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  nextMonthlyPayment.title,
-                                  style: Theme.of(
-                                    context,
-                                  ).textTheme.titleMedium,
+                                  _dueLabel(
+                                    _nextDueDate(nextMonthlyPayment, now),
+                                    now,
+                                  ),
+                                  style: Theme.of(context).textTheme.bodySmall,
                                 ),
                               ],
                             ),
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              Text(
-                                _money(nextMonthlyPayment.amount),
-                                style: Theme.of(context).textTheme.titleMedium
-                                    ?.copyWith(color: widget.accentColor),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                _dueLabel(
-                                  _nextDueDate(nextMonthlyPayment, now),
-                                  now,
-                                ),
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                            ],
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
                     ),
                     const SizedBox(height: 14),
@@ -390,8 +411,17 @@ class _ReportScreenState extends State<ReportScreen> {
                         ),
                       ],
                     )
-                  else
-                    ...sortedMonthlyPayments.map(
+                  else ...[
+                    if (remainingMonthlyPayments.isNotEmpty) ...[
+                      Text(
+                        nextMonthlyPayment == null
+                            ? 'Tüm aylık ödemeler'
+                            : 'Diğer aylık ödemeler',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                    ...remainingMonthlyPayments.map(
                       (payment) => Padding(
                         padding: const EdgeInsets.only(bottom: 10),
                         child: InkWell(
@@ -490,6 +520,7 @@ class _ReportScreenState extends State<ReportScreen> {
                         ),
                       ),
                     ),
+                  ],
                 ],
               ),
             ),
