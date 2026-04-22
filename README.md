@@ -13,11 +13,9 @@ Parafix, sade ve akıcı bir gider takip deneyimi sunmayı hedefleyen bir Flutte
 | --- | --- |
 | Durum | Aktif geliştirme aşamasında |
 | Hedef | Basit, kullanıcı dostu ve hızlı gider takibi |
-| Ana platform | iOS |
+| Hedef platformlar | iOS, Android |
 | Arayüz dili | Türkçe odaklı |
 | Veri saklama | Cihaz içi yerel saklama (`SharedPreferences`) |
-
-Bu repo şu anda Flutter'ın diğer platform klasörlerini de içeriyor; ancak aktif ürün geliştirmesi öncelikli olarak iOS deneyimi için ilerliyor.
 
 ## Öne Çıkan Özellikler
 
@@ -65,8 +63,8 @@ Parafix şu üç ilke etrafında şekilleniyor:
 ### Gereksinimler
 
 - Flutter stable SDK
-- Xcode
-- Bir iOS Simulator veya fiziksel iPhone
+- Xcode veya Android Studio
+- Bir iOS Simulator, Android Emulator veya fiziksel cihaz
 
 ### Kurulum
 
