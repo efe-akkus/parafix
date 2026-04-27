@@ -418,6 +418,8 @@ String _themeSubtitle(String id) {
       return 'Koyu ve odaklı.';
     case 'dust-rose':
       return 'Yumuşak ve kişisel.';
+    case 'burgundy':
+      return 'Sıcak ve güçlü.';
     default:
       return '';
   }

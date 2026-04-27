@@ -48,6 +48,17 @@ class ParafixTheme {
       accent: Color(0xFFC17D8F),
     ),
     const ParafixThemePreset(
+      id: 'burgundy',
+      name: 'Bordo',
+      brightness: Brightness.light,
+      background: Color(0xFFF1E5E7),
+      surface: Color(0xFFFFF7F7),
+      surfaceAlt: Color(0xFFE7D0D5),
+      textPrimary: Color(0xFF2A1D21),
+      mutedText: Color(0xFF765F65),
+      accent: Color(0xFFA8324A),
+    ),
+    const ParafixThemePreset(
       id: 'night',
       name: 'Koyu',
       brightness: Brightness.dark,
