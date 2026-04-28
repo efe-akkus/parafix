@@ -382,148 +382,208 @@ class _ParafixAppState extends State<ParafixApp> {
 
   List<ExpenseEntry> _seedEntries() {
     final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
     final categories = {
       for (final category in [..._coreCategories, ..._customCategories])
         category.id: category,
     };
 
+    DateTime at(int daysAgo, int hour, int minute) {
+      return today
+          .subtract(Duration(days: daysAgo))
+          .add(Duration(hours: hour, minutes: minute));
+    }
+
+    ExpenseEntry entry({
+      required String id,
+      required String title,
+      required double amount,
+      required DateTime date,
+      required String categoryId,
+      String? note,
+    }) {
+      return ExpenseEntry(
+        id: id,
+        title: title,
+        amount: amount,
+        date: date,
+        category: categories[categoryId]!,
+        note: note,
+      );
+    }
+
     return [
-      ExpenseEntry(
+      entry(
         id: '1',
-        title: 'Haftalık market',
-        amount: 420,
-        date: now,
-        category: categories['market']!,
-        note: 'Meyve ve temel gıda',
+        title: 'Sinema',
+        amount: 400,
+        date: at(0, 17, 20),
+        categoryId: 'other',
       ),
-      ExpenseEntry(
+      entry(
         id: '2',
-        title: 'Kahve',
-        amount: 90,
-        date: now.subtract(const Duration(hours: 4)),
-        category: categories['food']!,
-      ),
-      ExpenseEntry(
-        id: '3',
         title: 'Metro',
-        amount: 45,
-        date: now.subtract(const Duration(days: 1, hours: 2)),
-        category: categories['transport']!,
+        amount: 25,
+        date: at(0, 16, 45),
+        categoryId: 'transport',
       ),
-      ExpenseEntry(
+      entry(
+        id: '3',
+        title: 'Kitap',
+        amount: 700,
+        date: at(0, 14, 10),
+        categoryId: 'other',
+        note: 'Kampüs kitabevi',
+      ),
+      entry(
         id: '4',
-        title: 'Spotify',
-        amount: 60,
-        date: now.subtract(const Duration(days: 2)),
-        category: categories['bills']!,
+        title: 'Ara öğün',
+        amount: 250,
+        date: at(0, 11, 35),
+        categoryId: 'food',
       ),
-      ExpenseEntry(
+      entry(
         id: '5',
-        title: 'Veteriner',
-        amount: 280,
-        date: now.subtract(const Duration(days: 3)),
-        category: categories['pet']!,
+        title: 'Eczane',
+        amount: 850,
+        date: at(1, 18, 30),
+        categoryId: 'health',
       ),
-      ExpenseEntry(
+      entry(
         id: '6',
         title: 'Akşam yemeği',
-        amount: 230,
-        date: now.subtract(const Duration(days: 4)),
-        category: categories['food']!,
+        amount: 950,
+        date: at(2, 20, 15),
+        categoryId: 'food',
       ),
-      ExpenseEntry(
+      entry(
         id: '7',
-        title: 'Eczane',
-        amount: 175,
-        date: now.subtract(const Duration(days: 6)),
-        category: categories['health']!,
+        title: 'Metro',
+        amount: 50,
+        date: at(3, 9, 20),
+        categoryId: 'transport',
       ),
-      ExpenseEntry(
+      entry(
         id: '8',
-        title: 'İnternet faturası',
-        amount: 350,
-        date: now.subtract(const Duration(days: 8)),
-        category: categories['bills']!,
+        title: 'Aylık market',
+        amount: 2500,
+        date: at(4, 19, 5),
+        categoryId: 'market',
+        note: 'Temel ihtiyaçlar',
       ),
-      ExpenseEntry(
+      entry(
         id: '9',
-        title: 'Sinema',
-        amount: 210,
-        date: now.subtract(const Duration(days: 10)),
-        category: categories['other']!,
+        title: 'Veteriner',
+        amount: 1250,
+        date: at(5, 16, 40),
+        categoryId: 'pet',
       ),
-      ExpenseEntry(
+      entry(
         id: '10',
-        title: 'Market',
-        amount: 510,
-        date: now.subtract(const Duration(days: 12)),
-        category: categories['market']!,
+        title: 'Haftalık market',
+        amount: 650,
+        date: at(6, 18, 10),
+        categoryId: 'market',
       ),
-      ExpenseEntry(
+      entry(
         id: '11',
+        title: 'İnternet faturası',
+        amount: 620,
+        date: at(8, 10, 0),
+        categoryId: 'bills',
+      ),
+      entry(
+        id: '12',
+        title: 'Spor salonu',
+        amount: 750,
+        date: at(10, 12, 30),
+        categoryId: 'other',
+      ),
+      entry(
+        id: '13',
         title: 'Taksi',
         amount: 180,
-        date: now.subtract(const Duration(days: 15)),
-        category: categories['transport']!,
+        date: at(12, 22, 10),
+        categoryId: 'transport',
       ),
-      ExpenseEntry(
-        id: '12',
+      entry(
+        id: '14',
+        title: 'Market',
+        amount: 540,
+        date: at(14, 17, 50),
+        categoryId: 'market',
+      ),
+      entry(
+        id: '15',
+        title: 'Öğle yemeği',
+        amount: 220,
+        date: at(16, 13, 15),
+        categoryId: 'food',
+      ),
+      entry(
+        id: '16',
         title: 'Diş kontrolü',
         amount: 900,
-        date: now.subtract(const Duration(days: 18)),
-        category: categories['health']!,
+        date: at(19, 15, 45),
+        categoryId: 'health',
       ),
-      ExpenseEntry(
-        id: '13',
-        title: 'Öğle yemeği',
-        amount: 160,
-        date: now.subtract(const Duration(days: 21)),
-        category: categories['food']!,
-      ),
-      ExpenseEntry(
-        id: '14',
-        title: 'Mart marketi',
-        amount: 475,
-        date: now.subtract(const Duration(days: 24)),
-        category: categories['market']!,
-      ),
-      ExpenseEntry(
-        id: '15',
+      entry(
+        id: '17',
         title: 'Elektrik',
-        amount: 290,
-        date: now.subtract(const Duration(days: 27)),
-        category: categories['bills']!,
+        amount: 460,
+        date: at(22, 10, 25),
+        categoryId: 'bills',
+      ),
+      entry(
+        id: '18',
+        title: 'Mama',
+        amount: 320,
+        date: at(25, 18, 0),
+        categoryId: 'pet',
       ),
     ]..sort((a, b) => b.date.compareTo(a.date));
   }
 
   List<MonthlyPayment> _seedMonthlyPayments() {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
     final categories = {
       for (final category in [..._coreCategories, ..._customCategories])
         category.id: category,
     };
+
+    int billingDayIn(int days) {
+      return today.add(Duration(days: days)).day;
+    }
 
     return [
       MonthlyPayment(
         id: 'monthly-1',
         title: 'Spotify Premium',
         amount: 60,
-        billingDay: 16,
+        billingDay: billingDayIn(1),
         category: categories['bills']!,
       ),
       MonthlyPayment(
         id: 'monthly-2',
         title: 'İnternet',
-        amount: 350,
-        billingDay: 20,
+        amount: 620,
+        billingDay: billingDayIn(4),
         category: categories['bills']!,
       ),
       MonthlyPayment(
         id: 'monthly-3',
         title: 'iCloud+',
         amount: 80,
-        billingDay: 24,
+        billingDay: billingDayIn(8),
         category: categories['other']!,
+      ),
+      MonthlyPayment(
+        id: 'monthly-4',
+        title: 'Spor salonu',
+        amount: 750,
+        billingDay: billingDayIn(12),
+        category: categories['health']!,
       ),
     ];
   }
@@ -690,6 +750,7 @@ class _ParafixAppState extends State<ParafixApp> {
               )
               .toList(growable: false)
             ..sort((a, b) => b.date.compareTo(a.date));
+      nextEntries = _alignScreenshotSeedEntriesToToday(nextEntries);
     }
 
     if (storedMonthlyPayments != null) {
@@ -708,6 +769,9 @@ class _ParafixAppState extends State<ParafixApp> {
             ),
           )
           .toList(growable: false);
+      nextMonthlyPayments = _alignScreenshotSeedPaymentsToToday(
+        nextMonthlyPayments,
+      );
     } else if (storedPresetId != null ||
         storedCustomCategories != null ||
         storedEntries != null) {
@@ -751,6 +815,94 @@ class _ParafixAppState extends State<ParafixApp> {
             .toList(),
       ),
     );
+  }
+
+  List<ExpenseEntry> _alignScreenshotSeedEntriesToToday(
+    List<ExpenseEntry> entries,
+  ) {
+    const seedEntryIds = {
+      '1',
+      '2',
+      '3',
+      '4',
+      '5',
+      '6',
+      '7',
+      '8',
+      '9',
+      '10',
+      '11',
+      '12',
+      '13',
+      '14',
+      '15',
+      '16',
+      '17',
+      '18',
+    };
+
+    if (entries.isEmpty ||
+        entries.any((entry) => !seedEntryIds.contains(entry.id))) {
+      return entries;
+    }
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final newestDay = DateTime(
+      entries.first.date.year,
+      entries.first.date.month,
+      entries.first.date.day,
+    );
+    final dayOffset = today.difference(newestDay).inDays;
+
+    if (dayOffset == 0) {
+      return entries;
+    }
+
+    return entries
+        .map(
+          (entry) => ExpenseEntry(
+            id: entry.id,
+            title: entry.title,
+            amount: entry.amount,
+            date: entry.date.add(Duration(days: dayOffset)),
+            category: entry.category,
+            note: entry.note,
+          ),
+        )
+        .toList(growable: false)
+      ..sort((a, b) => b.date.compareTo(a.date));
+  }
+
+  List<MonthlyPayment> _alignScreenshotSeedPaymentsToToday(
+    List<MonthlyPayment> payments,
+  ) {
+    const seedPaymentOffsets = {
+      'monthly-1': 1,
+      'monthly-2': 4,
+      'monthly-3': 8,
+      'monthly-4': 12,
+    };
+
+    if (payments.isEmpty ||
+        payments.any(
+          (payment) => !seedPaymentOffsets.containsKey(payment.id),
+        )) {
+      return payments;
+    }
+
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    return payments
+        .map(
+          (payment) => payment.copyWith(
+            billingDay: today
+                .add(Duration(days: seedPaymentOffsets[payment.id]!))
+                .day,
+          ),
+        )
+        .toList(growable: false);
   }
 
   void _showFeedback(String message) {

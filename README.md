@@ -3,31 +3,24 @@
 ![Flutter](https://img.shields.io/badge/Flutter-stable-02569B?logo=flutter&logoColor=white)
 ![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart&logoColor=white)
 ![Status](https://img.shields.io/badge/Status-Active%20Development-C78A12)
-![Platform](https://img.shields.io/badge/Platform-iOS%20first-111827)
+![Platform](https://img.shields.io/badge/Platform-iOS%20%2B%20Android-111827)
 
-Parafix, sade ve akıcı bir gider takip deneyimi sunmayı hedefleyen bir Flutter uygulaması. Ana odak; hızlı kayıt, net özetler ve düşük cihazlarda da akıcı hissettiren bir kullanım deneyimi.
+Parafix, günlük harcamaları hızlıca kaydetmek ve nereye para gittiğini sade bir ekranda görmek için geliştirdiğim Flutter uygulaması.
 
-## Proje Özeti
+Amacım çok karmaşık bir finans uygulaması yapmak değil. Parafix'in odağı basit: harcamayı ekle, özetini gör, gerekirse rapora bak.
 
-| Alan | Detay |
-| --- | --- |
-| Durum | Aktif geliştirme aşamasında |
-| Hedef | Basit, kullanıcı dostu ve hızlı gider takibi |
-| Hedef platformlar | iOS, Android |
-| Arayüz dili | Türkçe odaklı |
-| Veri saklama | Cihaz içi yerel saklama (`SharedPreferences`) |
+## Neler Var?
 
-## Öne Çıkan Özellikler
-
-- Hızlı gider ekleme ve mevcut kaydı düzenleme
-- Kaydı silme için pratik liste etkileşimleri
-- Günlük, haftalık ve aylık toplamları tek ekranda görme
-- Son 7 günlük harcama akışı ve düne göre fark gösterimi
-- Son 7 gün, son 30 gün ve bu ay için rapor görünümü
-- Kategori bazlı dağılım özeti
+- Harcama ekleme, düzenleme ve silme
+- Ana sayfada bugün, son 7 gün ve bu ay özeti
+- Son 7 günlük harcama akışı
+- Gün detay ekranı
+- Rapor ekranında dönem filtreleri
+- Kategori bazlı harcama dağılımı
 - Aylık ödemeler ve abonelik takibi
-- Tema seçimi ve özel kategori kişiselleştirmesi
-- Hesap oluşturmadan çalışan, yerel öncelikli kullanım yapısı
+- Tema seçimi
+- Özel kategori ekleme
+- Cihaz içinde yerel veri saklama
 
 ## Ekran Görüntüleri
 
@@ -47,15 +40,7 @@ Parafix, sade ve akıcı bir gider takip deneyimi sunmayı hedefleyen bir Flutte
 | --- |
 | <img src="docs/screenshots/05-personalization.png" width="220" alt="Parafix personalization sheet" /> |
 
-## Tasarım Hedefi
-
-Parafix şu üç ilke etrafında şekilleniyor:
-
-- Az adımda kayıt girişi
-- Sade ve okunaklı arayüz
-- Desteklenen tüm cihazlarda akıcı hissiyat
-
-## Kullanılan Teknolojiler
+## Teknolojiler
 
 - Flutter
 - Dart
@@ -63,22 +48,14 @@ Parafix şu üç ilke etrafında şekilleniyor:
 - `flutter_slidable`
 - Material 3
 
-## Yerelde Çalıştırma
-
-### Gereksinimler
-
-- Flutter stable SDK
-- Xcode veya Android Studio
-- Bir iOS Simulator, Android Emulator veya fiziksel cihaz
-
-### Kurulum
+## Çalıştırma
 
 ```bash
 flutter pub get
 flutter run
 ```
 
-Eğer bağlı cihazları görmek istersen:
+Bağlı cihazları görmek için:
 
 ```bash
 flutter devices
@@ -88,18 +65,18 @@ flutter devices
 
 ```text
 lib/
-  app/         uygulama kabuğu, durum ve veri saklama akışı
-  core/        tema ve ortak yapı
-  features/    home, compose, report, settings ekranları
-  models/      gider ve kategori modelleri
+  app/         uygulama kabuğu ve veri akışı
+  core/        tema sistemi
+  features/    ana sayfa, rapor, harcama ekleme, ayarlar
+  models/      harcama, kategori ve aylık ödeme modelleri
 ```
 
-## Geliştirme Durumu
+## Durum
 
-Şu anda aktif olarak iyileştirilen başlıklar:
+Parafix aktif olarak geliştiriliyor. Şu an odaklandığım konular:
 
-- Ana ekran akışını daha da sadeleştirmek
-- Düşük cihazlarda animasyon ve geçişleri hafifletmek
-- Rapor ekranını kademeli olarak genişletmek
-- Aylık ödemeler alanını düzenlemek
-- Polishing
+- iOS tarafında daha iyi bir ilk sürüm hazırlamak
+- Android deneyimini kademeli olarak iyileştirmek
+- Aylık ödemeler akışını daha kullanışlı hale getirmek
+- Küçük ekranlarda arayüzü daha rahat hale getirmek
+- Genel arayüz polish'ini sürdürmek
