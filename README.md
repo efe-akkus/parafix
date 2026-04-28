@@ -52,8 +52,8 @@ Parafix, sade ve akıcı bir gider takip deneyimi sunmayı hedefleyen bir Flutte
 Parafix şu üç ilke etrafında şekilleniyor:
 
 - Az adımda kayıt girişi
-- Gürültüsüz ve okunaklı arayüz
-- Eski veya düşük güçlü cihazlarda da akıcı his
+- Sade ve okunaklı arayüz
+- Desteklenen tüm cihazlarda akıcı hissiyat
 
 ## Kullanılan Teknolojiler
 
@@ -101,4 +101,5 @@ lib/
 - Ana ekran akışını daha da sadeleştirmek
 - Düşük cihazlarda animasyon ve geçişleri hafifletmek
 - Rapor ekranını kademeli olarak genişletmek
-- Aylık ödemeler alanını tamamlamak
+- Aylık ödemeler alanını düzenlemek
+- Polishing
