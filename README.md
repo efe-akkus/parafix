@@ -25,6 +25,7 @@ Parafix, sade ve akıcı bir gider takip deneyimi sunmayı hedefleyen bir Flutte
 - Son 7 günlük harcama akışı ve düne göre fark gösterimi
 - Son 7 gün, son 30 gün ve bu ay için rapor görünümü
 - Kategori bazlı dağılım özeti
+- Aylık ödemeler ve abonelik takibi
 - Tema seçimi ve özel kategori kişiselleştirmesi
 - Hesap oluşturmadan çalışan, yerel öncelikli kullanım yapısı
 
@@ -37,6 +38,10 @@ Parafix, sade ve akıcı bir gider takip deneyimi sunmayı hedefleyen bir Flutte
 | Add Expense | Day Detail |
 | --- | --- |
 | <img src="docs/screenshots/03-add-expense.png" width="220" alt="Parafix add expense screen" /> | <img src="docs/screenshots/02-day-detail.png" width="220" alt="Parafix day detail sheet" /> |
+
+| Monthly Payments | Add Monthly Payment |
+| --- | --- |
+| <img src="docs/screenshots/06-monthly-payments.png" width="220" alt="Parafix monthly payments screen" /> | <img src="docs/screenshots/07-add-monthly-payment.png" width="220" alt="Parafix add monthly payment sheet" /> |
 
 | Personalization |
 | --- |
