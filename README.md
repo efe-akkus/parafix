@@ -5,6 +5,8 @@
 ![Status](https://img.shields.io/badge/Status-Active%20Development-C78A12)
 ![Platform](https://img.shields.io/badge/Platform-iOS%20%2B%20Android-111827)
 
+[App Store'da görüntüle](https://apps.apple.com/tr/app/parafix/id6764666105?l=tr)
+
 Parafix, günlük harcamaları hızlıca kaydetmek ve nereye para gittiğini sade bir ekranda görmek için geliştirdiğim Flutter uygulaması.
 
 Amacım çok karmaşık bir finans uygulaması yapmak değil. Parafix'in odağı basit: harcamayı ekle, özetini gör, gerekirse rapora bak.
