@@ -381,211 +381,11 @@ class _ParafixAppState extends State<ParafixApp> {
   }
 
   List<ExpenseEntry> _seedEntries() {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final categories = {
-      for (final category in [..._coreCategories, ..._customCategories])
-        category.id: category,
-    };
-
-    DateTime at(int daysAgo, int hour, int minute) {
-      return today
-          .subtract(Duration(days: daysAgo))
-          .add(Duration(hours: hour, minutes: minute));
-    }
-
-    ExpenseEntry entry({
-      required String id,
-      required String title,
-      required double amount,
-      required DateTime date,
-      required String categoryId,
-      String? note,
-    }) {
-      return ExpenseEntry(
-        id: id,
-        title: title,
-        amount: amount,
-        date: date,
-        category: categories[categoryId]!,
-        note: note,
-      );
-    }
-
-    return [
-      entry(
-        id: '1',
-        title: 'Sinema',
-        amount: 400,
-        date: at(0, 17, 20),
-        categoryId: 'other',
-      ),
-      entry(
-        id: '2',
-        title: 'Metro',
-        amount: 25,
-        date: at(0, 16, 45),
-        categoryId: 'transport',
-      ),
-      entry(
-        id: '3',
-        title: 'Kitap',
-        amount: 700,
-        date: at(0, 14, 10),
-        categoryId: 'other',
-        note: 'Kampüs kitabevi',
-      ),
-      entry(
-        id: '4',
-        title: 'Ara öğün',
-        amount: 250,
-        date: at(0, 11, 35),
-        categoryId: 'food',
-      ),
-      entry(
-        id: '5',
-        title: 'Eczane',
-        amount: 850,
-        date: at(1, 18, 30),
-        categoryId: 'health',
-      ),
-      entry(
-        id: '6',
-        title: 'Akşam yemeği',
-        amount: 950,
-        date: at(2, 20, 15),
-        categoryId: 'food',
-      ),
-      entry(
-        id: '7',
-        title: 'Metro',
-        amount: 50,
-        date: at(3, 9, 20),
-        categoryId: 'transport',
-      ),
-      entry(
-        id: '8',
-        title: 'Aylık market',
-        amount: 2500,
-        date: at(4, 19, 5),
-        categoryId: 'market',
-        note: 'Temel ihtiyaçlar',
-      ),
-      entry(
-        id: '9',
-        title: 'Veteriner',
-        amount: 1250,
-        date: at(5, 16, 40),
-        categoryId: 'pet',
-      ),
-      entry(
-        id: '10',
-        title: 'Haftalık market',
-        amount: 650,
-        date: at(6, 18, 10),
-        categoryId: 'market',
-      ),
-      entry(
-        id: '11',
-        title: 'İnternet faturası',
-        amount: 620,
-        date: at(8, 10, 0),
-        categoryId: 'bills',
-      ),
-      entry(
-        id: '12',
-        title: 'Spor salonu',
-        amount: 750,
-        date: at(10, 12, 30),
-        categoryId: 'other',
-      ),
-      entry(
-        id: '13',
-        title: 'Taksi',
-        amount: 180,
-        date: at(12, 22, 10),
-        categoryId: 'transport',
-      ),
-      entry(
-        id: '14',
-        title: 'Market',
-        amount: 540,
-        date: at(14, 17, 50),
-        categoryId: 'market',
-      ),
-      entry(
-        id: '15',
-        title: 'Öğle yemeği',
-        amount: 220,
-        date: at(16, 13, 15),
-        categoryId: 'food',
-      ),
-      entry(
-        id: '16',
-        title: 'Diş kontrolü',
-        amount: 900,
-        date: at(19, 15, 45),
-        categoryId: 'health',
-      ),
-      entry(
-        id: '17',
-        title: 'Elektrik',
-        amount: 460,
-        date: at(22, 10, 25),
-        categoryId: 'bills',
-      ),
-      entry(
-        id: '18',
-        title: 'Mama',
-        amount: 320,
-        date: at(25, 18, 0),
-        categoryId: 'pet',
-      ),
-    ]..sort((a, b) => b.date.compareTo(a.date));
+    return const [];
   }
 
   List<MonthlyPayment> _seedMonthlyPayments() {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final categories = {
-      for (final category in [..._coreCategories, ..._customCategories])
-        category.id: category,
-    };
-
-    int billingDayIn(int days) {
-      return today.add(Duration(days: days)).day;
-    }
-
-    return [
-      MonthlyPayment(
-        id: 'monthly-1',
-        title: 'Spotify Premium',
-        amount: 60,
-        billingDay: billingDayIn(1),
-        category: categories['bills']!,
-      ),
-      MonthlyPayment(
-        id: 'monthly-2',
-        title: 'İnternet',
-        amount: 620,
-        billingDay: billingDayIn(4),
-        category: categories['bills']!,
-      ),
-      MonthlyPayment(
-        id: 'monthly-3',
-        title: 'iCloud+',
-        amount: 80,
-        billingDay: billingDayIn(8),
-        category: categories['other']!,
-      ),
-      MonthlyPayment(
-        id: 'monthly-4',
-        title: 'Spor salonu',
-        amount: 750,
-        billingDay: billingDayIn(12),
-        category: categories['health']!,
-      ),
-    ];
+    return const [];
   }
 
   List<ExpenseEntry> _insertEntrySorted(
@@ -750,7 +550,9 @@ class _ParafixAppState extends State<ParafixApp> {
               )
               .toList(growable: false)
             ..sort((a, b) => b.date.compareTo(a.date));
-      nextEntries = _alignScreenshotSeedEntriesToToday(nextEntries);
+      if (_isScreenshotSeedEntries(nextEntries)) {
+        nextEntries = const [];
+      }
     }
 
     if (storedMonthlyPayments != null) {
@@ -769,9 +571,9 @@ class _ParafixAppState extends State<ParafixApp> {
             ),
           )
           .toList(growable: false);
-      nextMonthlyPayments = _alignScreenshotSeedPaymentsToToday(
-        nextMonthlyPayments,
-      );
+      if (_isScreenshotSeedPayments(nextMonthlyPayments)) {
+        nextMonthlyPayments = const [];
+      }
     } else if (storedPresetId != null ||
         storedCustomCategories != null ||
         storedEntries != null) {
@@ -817,9 +619,7 @@ class _ParafixAppState extends State<ParafixApp> {
     );
   }
 
-  List<ExpenseEntry> _alignScreenshotSeedEntriesToToday(
-    List<ExpenseEntry> entries,
-  ) {
+  bool _isScreenshotSeedEntries(List<ExpenseEntry> entries) {
     const seedEntryIds = {
       '1',
       '2',
@@ -841,68 +641,15 @@ class _ParafixAppState extends State<ParafixApp> {
       '18',
     };
 
-    if (entries.isEmpty ||
-        entries.any((entry) => !seedEntryIds.contains(entry.id))) {
-      return entries;
-    }
-
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final newestDay = DateTime(
-      entries.first.date.year,
-      entries.first.date.month,
-      entries.first.date.day,
-    );
-    final dayOffset = today.difference(newestDay).inDays;
-
-    if (dayOffset == 0) {
-      return entries;
-    }
-
-    return entries
-        .map(
-          (entry) => ExpenseEntry(
-            id: entry.id,
-            title: entry.title,
-            amount: entry.amount,
-            date: entry.date.add(Duration(days: dayOffset)),
-            category: entry.category,
-            note: entry.note,
-          ),
-        )
-        .toList(growable: false)
-      ..sort((a, b) => b.date.compareTo(a.date));
+    return entries.isNotEmpty &&
+        entries.every((entry) => seedEntryIds.contains(entry.id));
   }
 
-  List<MonthlyPayment> _alignScreenshotSeedPaymentsToToday(
-    List<MonthlyPayment> payments,
-  ) {
-    const seedPaymentOffsets = {
-      'monthly-1': 1,
-      'monthly-2': 4,
-      'monthly-3': 8,
-      'monthly-4': 12,
-    };
+  bool _isScreenshotSeedPayments(List<MonthlyPayment> payments) {
+    const seedPaymentIds = {'monthly-1', 'monthly-2', 'monthly-3', 'monthly-4'};
 
-    if (payments.isEmpty ||
-        payments.any(
-          (payment) => !seedPaymentOffsets.containsKey(payment.id),
-        )) {
-      return payments;
-    }
-
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-
-    return payments
-        .map(
-          (payment) => payment.copyWith(
-            billingDay: today
-                .add(Duration(days: seedPaymentOffsets[payment.id]!))
-                .day,
-          ),
-        )
-        .toList(growable: false);
+    return payments.isNotEmpty &&
+        payments.every((payment) => seedPaymentIds.contains(payment.id));
   }
 
   void _showFeedback(String message) {
