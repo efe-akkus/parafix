@@ -759,7 +759,7 @@ class _LaunchSplashState extends State<_LaunchSplash>
     _controller =
         AnimationController(
           vsync: this,
-          duration: const Duration(milliseconds: 1200),
+          duration: const Duration(milliseconds: 1000),
         )..addStatusListener((status) {
           if (status == AnimationStatus.completed) {
             widget.onCompleted();
