@@ -8,11 +8,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../core/theme/parafix_theme.dart';
 import '../features/compose/add_expense_sheet.dart';
 import '../features/home/home_screen.dart';
+import '../features/onboarding/onboarding_screen.dart';
 import '../features/report/report_screen.dart';
 import '../features/settings/personalization_sheet.dart';
 import '../models/expense_category.dart';
 import '../models/expense_entry.dart';
 import '../models/monthly_payment.dart';
+
+const _appIconAssetPath =
+    'ios/Runner/Assets.xcassets/AppIcon.appiconset/Icon-App-60x60@3x.png';
 
 class ParafixApp extends StatefulWidget {
   const ParafixApp({super.key});
@@ -26,6 +30,7 @@ class _ParafixAppState extends State<ParafixApp> {
   static const _customCategoriesStorageKey = 'parafix_custom_categories_v1';
   static const _entriesStorageKey = 'parafix_entries_v1';
   static const _monthlyPaymentsStorageKey = 'parafix_monthly_payments_v1';
+  static const _onboardingStorageKey = 'parafix_has_seen_onboarding_v1';
 
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   late final PageController _pageController;
@@ -75,6 +80,9 @@ class _ParafixAppState extends State<ParafixApp> {
 
   late ParafixThemePreset _selectedPreset;
   late List<ExpenseCategory> _customCategories;
+  var _hasSeenOnboarding = false;
+  var _hasRestoredState = false;
+  var _hasPlayedLaunchAnimation = false;
 
   @override
   void initState() {
@@ -119,6 +127,10 @@ class _ParafixAppState extends State<ParafixApp> {
 
   @override
   Widget build(BuildContext context) {
+    final themePreset = _hasSeenOnboarding
+        ? _selectedPreset
+        : ParafixTheme.presets.first;
+
     return MaterialApp(
       title: 'Parafix',
       debugShowCheckedModeBanner: false,
@@ -130,101 +142,119 @@ class _ParafixAppState extends State<ParafixApp> {
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: const [Locale('tr'), Locale('en')],
-      theme: ParafixTheme.buildTheme(preset: _selectedPreset),
+      theme: ParafixTheme.buildTheme(preset: themePreset),
       scrollBehavior: const ParafixScrollBehavior(),
-      home: Scaffold(
-        extendBody: true,
-        appBar: AppBar(
-          toolbarHeight: 76,
-          titleSpacing: 0,
-          title: ValueListenableBuilder<int>(
-            valueListenable: _tabIndexNotifier,
-            builder: (context, tabIndex, _) {
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    tabIndex == 0 ? 'Parafix' : 'Rapor',
-                    style: const TextStyle(
-                      fontSize: 26,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  Text(
-                    tabIndex == 0
-                        ? 'Harcamalarını tek bakışta gör.'
-                        : 'Özetini net biçimde incele.',
-                    style: Theme.of(context).textTheme.bodySmall,
-                  ),
-                ],
-              );
-            },
-          ),
-          actions: [
-            Padding(
-              padding: const EdgeInsets.only(right: 16),
-              child: IconButton.filledTonal(
-                onPressed: _openPersonalization,
-                icon: const Icon(Icons.tune_rounded),
-                tooltip: 'Tema ve kategoriler',
-              ),
-            ),
-          ],
-        ),
-        body: PageView(
-          controller: _pageController,
-          onPageChanged: (index) => _tabIndexNotifier.value = index,
-          children: [
-            ValueListenableBuilder<List<ExpenseEntry>>(
-              valueListenable: _entriesNotifier,
-              builder: (context, entries, _) {
-                return RepaintBoundary(
-                  child: HomeScreen(
-                    key: const PageStorageKey('home-screen'),
-                    entries: entries,
-                    accentColor: _selectedPreset.accent,
-                    onDeleteEntry: _deleteEntry,
-                    onEditEntry: _editEntry,
-                  ),
-                );
-              },
-            ),
-            ListenableBuilder(
-              listenable: Listenable.merge([
-                _entriesNotifier,
-                _monthlyPaymentsNotifier,
-              ]),
-              builder: (context, _) {
-                return RepaintBoundary(
-                  child: ReportScreen(
-                    key: const PageStorageKey('report-screen'),
-                    entries: _entriesNotifier.value,
-                    monthlyPayments: _monthlyPaymentsNotifier.value,
-                    categories: _allCategories,
-                    accentColor: _selectedPreset.accent,
-                    onUpsertMonthlyPayment: _upsertMonthlyPayment,
-                    onDeleteMonthlyPayment: _deleteMonthlyPayment,
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton.large(
-          onPressed: _openAddExpense,
-          elevation: 0,
-          child: const Icon(Icons.add_rounded, size: 34),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        bottomNavigationBar: ValueListenableBuilder<int>(
+      home: _buildHome(),
+    );
+  }
+
+  Widget _buildHome() {
+    if (!_hasRestoredState) {
+      return const _StartupHold();
+    }
+
+    if (!_hasPlayedLaunchAnimation) {
+      return _LaunchSplash(onCompleted: _finishLaunchAnimation);
+    }
+
+    if (!_hasSeenOnboarding) {
+      return OnboardingScreen(
+        onCompleted: () => unawaited(_completeOnboarding()),
+      );
+    }
+
+    return Scaffold(
+      extendBody: true,
+      appBar: AppBar(
+        toolbarHeight: 76,
+        titleSpacing: 0,
+        title: ValueListenableBuilder<int>(
           valueListenable: _tabIndexNotifier,
           builder: (context, tabIndex, _) {
-            return _ShellNavigationBar(
-              currentIndex: tabIndex,
-              onSelected: _goToTab,
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text(
+                  tabIndex == 0 ? 'Parafix' : 'Rapor',
+                  style: const TextStyle(
+                    fontSize: 26,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                Text(
+                  tabIndex == 0
+                      ? 'Harcamalarını tek bakışta gör.'
+                      : 'Özetini net biçimde incele.',
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ],
             );
           },
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: IconButton.filledTonal(
+              onPressed: _openPersonalization,
+              icon: const Icon(Icons.tune_rounded),
+              tooltip: 'Tema ve kategoriler',
+            ),
+          ),
+        ],
+      ),
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (index) => _tabIndexNotifier.value = index,
+        children: [
+          ValueListenableBuilder<List<ExpenseEntry>>(
+            valueListenable: _entriesNotifier,
+            builder: (context, entries, _) {
+              return RepaintBoundary(
+                child: HomeScreen(
+                  key: const PageStorageKey('home-screen'),
+                  entries: entries,
+                  accentColor: _selectedPreset.accent,
+                  onDeleteEntry: _deleteEntry,
+                  onEditEntry: _editEntry,
+                ),
+              );
+            },
+          ),
+          ListenableBuilder(
+            listenable: Listenable.merge([
+              _entriesNotifier,
+              _monthlyPaymentsNotifier,
+            ]),
+            builder: (context, _) {
+              return RepaintBoundary(
+                child: ReportScreen(
+                  key: const PageStorageKey('report-screen'),
+                  entries: _entriesNotifier.value,
+                  monthlyPayments: _monthlyPaymentsNotifier.value,
+                  categories: _allCategories,
+                  accentColor: _selectedPreset.accent,
+                  onUpsertMonthlyPayment: _upsertMonthlyPayment,
+                  onDeleteMonthlyPayment: _deleteMonthlyPayment,
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.large(
+        onPressed: _openAddExpense,
+        elevation: 0,
+        child: const Icon(Icons.add_rounded, size: 34),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: ValueListenableBuilder<int>(
+        valueListenable: _tabIndexNotifier,
+        builder: (context, tabIndex, _) {
+          return _ShellNavigationBar(
+            currentIndex: tabIndex,
+            onSelected: _goToTab,
+          );
+        },
       ),
     );
   }
@@ -508,6 +538,13 @@ class _ParafixAppState extends State<ParafixApp> {
     final storedMonthlyPayments = preferences.getString(
       _monthlyPaymentsStorageKey,
     );
+    final hasExistingState =
+        storedPresetId != null ||
+        storedCustomCategories != null ||
+        storedEntries != null ||
+        storedMonthlyPayments != null;
+    final storedHasSeenOnboarding =
+        preferences.getBool(_onboardingStorageKey) ?? hasExistingState;
 
     var nextPreset = _selectedPreset;
     var nextCustomCategories = _customCategories;
@@ -587,11 +624,31 @@ class _ParafixAppState extends State<ParafixApp> {
     setState(() {
       _selectedPreset = nextPreset;
       _customCategories = nextCustomCategories;
+      _hasSeenOnboarding = storedHasSeenOnboarding;
+      _hasRestoredState = true;
       if (nextEntries != null) {
         _entriesNotifier.value = nextEntries;
       }
       _monthlyPaymentsNotifier.value = nextMonthlyPayments;
     });
+  }
+
+  void _finishLaunchAnimation() {
+    if (!mounted || _hasPlayedLaunchAnimation) {
+      return;
+    }
+
+    setState(() => _hasPlayedLaunchAnimation = true);
+  }
+
+  Future<void> _completeOnboarding() async {
+    if (!mounted) {
+      return;
+    }
+
+    setState(() => _hasSeenOnboarding = true);
+    final preferences = await SharedPreferences.getInstance();
+    await preferences.setBool(_onboardingStorageKey, true);
   }
 
   Future<void> _persistState() async {
@@ -679,6 +736,131 @@ class _ParafixAppState extends State<ParafixApp> {
       _feedbackEntry?.remove();
       _feedbackEntry = null;
     });
+  }
+}
+
+class _LaunchSplash extends StatefulWidget {
+  const _LaunchSplash({required this.onCompleted});
+
+  final VoidCallback onCompleted;
+
+  @override
+  State<_LaunchSplash> createState() => _LaunchSplashState();
+}
+
+class _LaunchSplashState extends State<_LaunchSplash>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _screenOpacity;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller =
+        AnimationController(
+          vsync: this,
+          duration: const Duration(milliseconds: 1200),
+        )..addStatusListener((status) {
+          if (status == AnimationStatus.completed) {
+            widget.onCompleted();
+          }
+        });
+    _screenOpacity = TweenSequence<double>([
+      TweenSequenceItem(tween: ConstantTween<double>(1), weight: 72),
+      TweenSequenceItem(
+        tween: Tween<double>(
+          begin: 1,
+          end: 0,
+        ).chain(CurveTween(curve: Curves.easeInOutCubic)),
+        weight: 28,
+      ),
+    ]).animate(_controller);
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final palette = theme.extension<ParafixPalette>()!;
+    final isDark = theme.brightness == Brightness.dark;
+    final backgroundColor = isDark
+        ? const Color(0xFF0B1A2E)
+        : palette.background;
+
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      body: FadeTransition(
+        opacity: _screenOpacity,
+        child: SizedBox.expand(
+          child: ColoredBox(
+            color: backgroundColor,
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _LaunchAppIcon(palette, matchThemeColor: !isDark),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Parafix',
+                    style: theme.textTheme.headlineMedium?.copyWith(
+                      fontSize: 30,
+                      height: 1,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LaunchAppIcon extends StatelessWidget {
+  const _LaunchAppIcon(this.palette, {required this.matchThemeColor});
+
+  final ParafixPalette palette;
+  final bool matchThemeColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final icon = ClipRRect(
+      borderRadius: BorderRadius.circular(28),
+      child: Image.asset(
+        _appIconAssetPath,
+        width: 92,
+        height: 92,
+        cacheWidth: 276,
+        cacheHeight: 276,
+        fit: BoxFit.cover,
+        filterQuality: FilterQuality.medium,
+      ),
+    );
+
+    if (!matchThemeColor) {
+      return icon;
+    }
+
+    return ColorFiltered(
+      colorFilter: ColorFilter.mode(palette.accent, BlendMode.hue),
+      child: icon,
+    );
+  }
+}
+
+class _StartupHold extends StatelessWidget {
+  const _StartupHold();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(body: SizedBox.expand());
   }
 }
 
@@ -786,9 +968,9 @@ class _ShellNavigationBar extends StatelessWidget {
         ],
       ),
       child: BottomAppBar(
-        height: 84,
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-        notchMargin: 10,
+        height: 88,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        notchMargin: 12,
         shape: const CircularNotchedRectangle(),
         child: Row(
           children: [
@@ -800,7 +982,7 @@ class _ShellNavigationBar extends StatelessWidget {
                 onTap: () => onSelected(0),
               ),
             ),
-            const SizedBox(width: 72),
+            const SizedBox(width: 112),
             Expanded(
               child: _NavItem(
                 label: 'Rapor',
@@ -839,40 +1021,61 @@ class _NavItem extends StatelessWidget {
     return InkWell(
       borderRadius: BorderRadius.circular(20),
       onTap: onTap,
-      child: TweenAnimationBuilder<double>(
-        tween: Tween<double>(begin: 0, end: selected ? 1 : 0),
-        duration: const Duration(milliseconds: 160),
-        curve: Curves.easeOutCubic,
-        builder: (context, value, child) {
-          return Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            decoration: BoxDecoration(
-              color: Color.lerp(Colors.transparent, selectedBackground, value),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Transform.scale(
-                  scale: 1 + (0.04 * value),
-                  child: Icon(
-                    icon,
-                    color: Color.lerp(colors.mutedText, colors.accent, value),
-                  ),
+      child: Center(
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: TweenAnimationBuilder<double>(
+            tween: Tween<double>(begin: 0, end: selected ? 1 : 0),
+            duration: const Duration(milliseconds: 160),
+            curve: Curves.easeOutCubic,
+            builder: (context, value, child) {
+              return Container(
+                constraints: const BoxConstraints(minWidth: 112),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  label,
-                  style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: Color.lerp(colors.mutedText, colors.accent, value),
-                    fontWeight: FontWeight.w700,
+                decoration: BoxDecoration(
+                  color: Color.lerp(
+                    Colors.transparent,
+                    selectedBackground,
+                    value,
                   ),
+                  borderRadius: BorderRadius.circular(20),
                 ),
-              ],
-            ),
-          );
-        },
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Transform.scale(
+                      scale: 1 + (0.04 * value),
+                      child: Icon(
+                        icon,
+                        color: Color.lerp(
+                          colors.mutedText,
+                          colors.accent,
+                          value,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 7),
+                    Text(
+                      label,
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                        color: Color.lerp(
+                          colors.mutedText,
+                          colors.accent,
+                          value,
+                        ),
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
       ),
     );
   }
