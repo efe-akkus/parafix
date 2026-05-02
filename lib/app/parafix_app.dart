@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/theme/parafix_theme.dart';
@@ -260,6 +261,7 @@ class _ParafixAppState extends State<ParafixApp> {
   }
 
   Future<void> _openAddExpense() async {
+    unawaited(HapticFeedback.selectionClick());
     await _openExpenseSheet();
   }
 
@@ -324,6 +326,7 @@ class _ParafixAppState extends State<ParafixApp> {
       nextEntry,
     );
     unawaited(_persistState());
+    unawaited(HapticFeedback.lightImpact());
 
     _showFeedback(isEditing ? 'Harcama güncellendi.' : 'Harcama eklendi.');
 
@@ -475,6 +478,7 @@ class _ParafixAppState extends State<ParafixApp> {
       nextPayment,
     );
     unawaited(_persistState());
+    unawaited(HapticFeedback.lightImpact());
     _showFeedback(
       isEditing ? 'Aylık ödeme güncellendi.' : 'Aylık ödeme eklendi.',
     );
@@ -496,6 +500,7 @@ class _ParafixAppState extends State<ParafixApp> {
         .where((payment) => payment.id != id)
         .toList(growable: false);
     unawaited(_persistState());
+    unawaited(HapticFeedback.mediumImpact());
     _showFeedback('Aylık ödeme silindi.');
   }
 
@@ -516,6 +521,7 @@ class _ParafixAppState extends State<ParafixApp> {
         .where((entry) => entry.id != target.id)
         .toList(growable: false);
     unawaited(_persistState());
+    unawaited(HapticFeedback.mediumImpact());
     _showFeedback('Harcama silindi.');
   }
 
@@ -525,6 +531,7 @@ class _ParafixAppState extends State<ParafixApp> {
     }
 
     setState(() => _selectedPreset = preset);
+    unawaited(HapticFeedback.selectionClick());
     unawaited(_persistState());
   }
 
