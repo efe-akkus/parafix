@@ -26,21 +26,13 @@ Amacım çok karmaşık bir finans uygulaması yapmak değil. Parafix'in odağı
 
 ## Ekran Görüntüleri
 
-| Home | Report |
+| Ana Sayfa | Rapor ve Aylık Ödemeler |
 | --- | --- |
-| <img src="docs/screenshots/01-home.png" width="220" alt="Parafix home screen" /> | <img src="docs/screenshots/04-report.png" width="220" alt="Parafix report screen" /> |
+| <img src="docs/app-store-screenshots/premium-blue-v2/01-home.png" width="260" alt="Parafix ana sayfa App Store görseli" /> | <img src="docs/app-store-screenshots/premium-blue-v2/02-report-payments.png" width="260" alt="Parafix rapor ve aylık ödemeler App Store görseli" /> |
 
-| Add Expense | Day Detail |
+| Yeni Harcama | Kişiselleştir |
 | --- | --- |
-| <img src="docs/screenshots/03-add-expense.png" width="220" alt="Parafix add expense screen" /> | <img src="docs/screenshots/02-day-detail.png" width="220" alt="Parafix day detail sheet" /> |
-
-| Monthly Payments | Add Monthly Payment |
-| --- | --- |
-| <img src="docs/screenshots/06-monthly-payments.png" width="220" alt="Parafix monthly payments screen" /> | <img src="docs/screenshots/07-add-monthly-payment.png" width="220" alt="Parafix add monthly payment sheet" /> |
-
-| Personalization |
-| --- |
-| <img src="docs/screenshots/05-personalization.png" width="220" alt="Parafix personalization sheet" /> |
+| <img src="docs/app-store-screenshots/premium-blue-v2/03-fast-entry.png" width="260" alt="Parafix yeni harcama App Store görseli" /> | <img src="docs/app-store-screenshots/premium-blue-v2/04-personalization.png" width="260" alt="Parafix kişiselleştirme App Store görseli" /> |
 
 ## Teknolojiler
 
