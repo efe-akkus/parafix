@@ -80,6 +80,18 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
     final palette = Theme.of(context).extension<ParafixPalette>()!;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final compactInputDecoration = InputDecorationTheme(
+      labelStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
+        fontWeight: FontWeight.w700,
+        color: palette.textPrimary,
+      ),
+      floatingLabelStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
+        fontWeight: FontWeight.w700,
+        color: palette.textPrimary,
+      ),
+      hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
+        fontWeight: FontWeight.w700,
+        color: palette.mutedText,
+      ),
       contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(20),
@@ -190,7 +202,7 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
                       inputFormatters: const [_AmountInputFormatter()],
                       style: Theme.of(context).textTheme.headlineLarge
                           ?.copyWith(
-                            fontWeight: FontWeight.w400,
+                            fontWeight: FontWeight.w700,
                             letterSpacing: -0.8,
                           ),
                       decoration: const InputDecoration(
@@ -213,6 +225,9 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
                     ).copyWith(inputDecorationTheme: compactInputDecoration),
                     child: TextFormField(
                       controller: _titleController,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                       textInputAction: TextInputAction.next,
                       onFieldSubmitted: (_) =>
                           FocusScope.of(context).nextFocus(),
@@ -257,6 +272,9 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
                     ).copyWith(inputDecorationTheme: compactInputDecoration),
                     child: TextFormField(
                       controller: _noteController,
+                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
                       minLines: 1,
                       maxLines: 1,
                       textInputAction: TextInputAction.done,
@@ -283,12 +301,14 @@ class _AddExpenseSheetState extends State<AddExpenseSheet> {
                         children: [
                           Text(
                             'Tarih',
-                            style: Theme.of(context).textTheme.titleSmall,
+                            style: Theme.of(context).textTheme.titleSmall
+                                ?.copyWith(fontWeight: FontWeight.w700),
                           ),
                           const Spacer(),
                           Text(
                             _formatDate(_selectedDate),
-                            style: Theme.of(context).textTheme.bodyMedium,
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(fontWeight: FontWeight.w700),
                           ),
                           const SizedBox(width: 10),
                           Icon(
